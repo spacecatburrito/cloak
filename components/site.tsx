@@ -20,12 +20,8 @@ export function Container({
 export function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2 tracking-tight">
-      <span
-        aria-hidden
-        className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-surface"
-      >
-        ◆
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/vendor/cloak-mark.svg" alt="" className="h-7 w-7" />
       <span className="font-display text-xl">Cloak</span>
     </Link>
   );
