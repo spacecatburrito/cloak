@@ -59,8 +59,8 @@ export default async function GivePage({
         <Link href="/gallery" className="text-sm text-muted hover:text-foreground">
           ← All causes
         </Link>
-        <div className="mt-6 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-          <div>
+        <div className="mt-6 grid gap-10 lg:grid-cols-3">
+          <div className="lg:col-span-2">
             <span
               className="inline-flex w-fit items-center rounded-full px-3 py-1 text-xs font-medium"
               style={{ backgroundColor: `${cause.accent}1a`, color: cause.accent }}
@@ -83,7 +83,7 @@ export default async function GivePage({
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-8 h-fit space-y-6">
+          <aside className="lg:col-span-1 lg:sticky lg:top-8 h-fit space-y-6">
             <DonateWidget causes={[cause]} lockedSlug={cause.slug} />
             <div className="rounded-2xl border border-border bg-surface p-6">
               <EmbedSnippet slug={cause.slug} />

@@ -10,16 +10,16 @@ const STEPS = [
   {
     n: "01",
     t: "Deposit into the pool",
-    d: "Your wallet sends funds into a shared Privacy Pool. This part is public, like any transaction.",
+    d: "You deposit ETH into a shared Privacy Pool. This step is public, like any transaction.",
   },
   {
     n: "02",
     t: "The link is broken",
-    d: "The gift leaves the pool to the cause with no on-chain trail back to your address.",
+    d: "The gift moves from the pool to the cause, with no on-chain trail back to you.",
   },
   {
     n: "03",
-    t: "Clean, and accountable",
+    t: "Clean and accountable",
     d: "The cause can prove the funds are not from illicit sources, so it can accept them openly.",
   },
 ];
