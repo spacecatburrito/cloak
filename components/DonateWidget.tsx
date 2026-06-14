@@ -180,8 +180,21 @@ export function DonateWidget({
         <>
           <h3 className="font-display text-2xl font-light tracking-tight">Give privately</h3>
           <p className="mt-1 text-sm text-muted">
-            Send from your wallet. No public link back to you. Sepolia testnet demo.
+            Send from your wallet. No public link back to you.
           </p>
+
+          {/* Network badge - always explicit about which chain this runs on */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-accent-soft px-3 py-1 font-medium text-accent">
+              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+              Network: Ethereum Sepolia (testnet)
+            </span>
+            {isConnected && chainId !== sepolia.id && (
+              <span className="font-medium text-danger">
+                Wrong network - switch to Sepolia
+              </span>
+            )}
+          </div>
 
           {/* Recipient selector */}
           {!lockedSlug && (
