@@ -18,6 +18,7 @@ import {
   depositForViaV2,
   depositToSelfViaV2,
   withdrawToCauseViaV2,
+  isWithdrawReadyViaV2,
   NOT_APPROVED,
 } from "@/lib/privacypool/v2";
 import { RELAYER_URL, explorerTx } from "@/lib/privacypool/config";
@@ -53,6 +54,7 @@ export function DonateWidget({
   const [copied, setCopied] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawMsg, setWithdrawMsg] = useState("");
+  const [ready, setReady] = useState<"idle" | "checking" | "ready" | "pending">("idle");
 
   const { method } = useMethod();
 
@@ -223,6 +225,7 @@ export function DonateWidget({
     setTwoStepDone(false);
     setTwoStepTx("");
     setWithdrawMsg("");
+    setReady("idle");
   }
 
   // Step 2, in-app: withdraw the approved deposit privately to the cause via the relayer.
@@ -258,6 +261,33 @@ export function DonateWidget({
       }
     } finally {
       setWithdrawing(false);
+      setStepNote("");
+    }
+  }
+
+  // Check whether the Association Set has approved the deposit (so it's withdrawable).
+  async function handleCheckReady() {
+    if (!address) return;
+    setReady("checking");
+    setWithdrawMsg("");
+    setStepNote("");
+    try {
+      const ok = await isWithdrawReadyViaV2({
+        ownerAddress: address,
+        signMessage: (message) => signMessageAsync({ message }),
+        onStep: setStepNote,
+      });
+      setReady(ok ? "ready" : "pending");
+      if (!ok) {
+        setWithdrawMsg(
+          "Still being approved by the Association Set (usually ~10-15 min). Come back and check again in a few minutes.",
+        );
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      setReady("idle");
+      setWithdrawMsg("Couldn't check approval status - try again in a moment.");
+    } finally {
       setStepNote("");
     }
   }
@@ -301,14 +331,30 @@ export function DonateWidget({
             </button>
           </div>
 
-          {RELAYER_URL && (
-            <button
-              onClick={handleWithdraw}
-              disabled={withdrawing}
-              className="mt-4 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
-            >
-              {withdrawing ? stepNote || "Withdrawing…" : `Withdraw to ${recipientName} now`}
-            </button>
+          {RELAYER_URL &&
+            (ready === "ready" ? (
+              <button
+                onClick={handleWithdraw}
+                disabled={withdrawing}
+                className="mt-4 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+              >
+                {withdrawing ? stepNote || "Withdrawing…" : `Withdraw to ${recipientName} now`}
+              </button>
+            ) : (
+              <button
+                onClick={handleCheckReady}
+                disabled={ready === "checking"}
+                className="mt-4 w-full rounded-full border border-accent px-5 py-3 font-medium text-accent transition hover:bg-accent-soft disabled:opacity-60"
+              >
+                {ready === "checking"
+                  ? stepNote || "Checking approval…"
+                  : "Check if it's ready to withdraw"}
+              </button>
+            ))}
+          {ready === "ready" && (
+            <p className="mt-2 text-xs font-medium text-accent">
+              Approved by the Association Set - you can withdraw now.
+            </p>
           )}
           {withdrawMsg && <p className="mt-2 text-xs text-foreground/80">{withdrawMsg}</p>}
 

@@ -171,6 +171,29 @@ export type V2WithdrawDeps = {
 };
 
 /**
+ * Has the Association Set approved a deposit yet? Returns true when the account
+ * has a spendable (ACTIVE) native-ETH note - i.e. the withdrawal is available.
+ */
+export async function isWithdrawReadyViaV2(deps: {
+  ownerAddress: Address;
+  signMessage: (message: string) => Promise<Hex>;
+  onStep?: (label: string) => void;
+}): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const session: any = await buildSession(deps.ownerAddress, deps.signMessage, deps.onStep);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const notes: any[] = (session.getNotes ? session.getNotes() : []) || [];
+  const isEth = (t: string) =>
+    (t || "").toLowerCase() === NATIVE_ASSET_ADDRESS.toLowerCase();
+  return notes.some(
+    (n) =>
+      String(n.status).toUpperCase().includes("ACTIVE") &&
+      isEth(n.tokenId) &&
+      BigInt(n.value) > 0n,
+  );
+}
+
+/**
  * Step 2, fully in-app: discover the user's deposited note. If the Association
  * Set has approved it (note is ACTIVE), generate the withdrawal proof and submit
  * it privately to the cause via the relayer. Throws NOT_APPROVED if the deposit
