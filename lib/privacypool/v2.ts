@@ -4,7 +4,7 @@ import {
   DEFAULT_CIRCUIT_MANIFEST,
 } from "@0xbow-io/privacy-pools-v2-sdk";
 import { keccak256, type Address, type Hex } from "viem";
-import { RPC_URL, RELAYER_URL, RELAYER_ADDRESS, RELAYER_PROCESSOR } from "./config";
+import { RPC_URL, RELAYER_URL, RELAYER_ADDRESS, RELAYER_PROCESSOR, ASP_ENDPOINT } from "./config";
 
 // Defined locally: these are not reliably resolvable as named runtime exports
 // of the V2 SDK under the bundler. The ETH sentinel is the protocol constant.
@@ -79,7 +79,7 @@ async function buildSession(ownerAddress: Address, signMessage: BaseDeps["signMe
     rpcUrl: RPC_URL,
     ownerAddress,
     protocolKeys,
-    ipfsGatewayUrl: IPFS_GATEWAY_URLS[0],
+    aspUrl: ASP_ENDPOINT,
     circuitGatewayUrls: [...IPFS_GATEWAY_URLS],
     circuitManifest: CIRCUIT_MANIFEST,
     relayers: [

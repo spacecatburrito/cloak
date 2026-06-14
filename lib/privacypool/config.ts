@@ -7,8 +7,10 @@ import type { Address } from "viem";
  */
 export const CHAIN = sepolia;
 
+// Public default; for reliability (the SDK does heavy log reads) set
+// NEXT_PUBLIC_RPC_URL to an Alchemy/Infura Sepolia endpoint in .env.local.
 export const RPC_URL =
-  process.env.NEXT_PUBLIC_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
+  process.env.NEXT_PUBLIC_RPC_URL || "https://sepolia.drpc.org";
 
 /** Current Privacy Pools v2 Sepolia deployment (matches the SDK DEPLOYMENTS table). */
 export const POOL_ADDRESS: Address =
@@ -35,7 +37,10 @@ export const SIMULATE =
  */
 export const USE_V2 = process.env.NEXT_PUBLIC_USE_V2 === "true";
 
-export const ASP_ENDPOINT = process.env.NEXT_PUBLIC_ASP_ENDPOINT || "";
+// ASP (Association Set Provider) HTTP endpoint. Deposits need its public key,
+// which the IPFS data source cannot serve, so an HTTP aspUrl is required.
+export const ASP_ENDPOINT =
+  process.env.NEXT_PUBLIC_ASP_ENDPOINT || "https://api-dev.0xbow.io";
 
 /**
  * Privacy Pools v2 staging relayer (Sepolia). Withdrawals must be relayed - the
