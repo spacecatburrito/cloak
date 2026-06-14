@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Container, SiteHeader, SiteFooter } from "@/components/site";
 import { ThreatModelPanel } from "@/components/ThreatModelPanel";
 import { DonateWidget } from "@/components/DonateWidget";
+import { GlobalRepression } from "@/components/GlobalRepression";
 import { getCauses } from "@/lib/causes";
 
 const STEPS = [
@@ -48,10 +49,10 @@ export default function Home() {
               className="reveal mt-6 max-w-xl text-lg leading-8 text-muted"
               style={{ animationDelay: "180ms" }}
             >
-              In Norvelia, Ardenia, Velmora and beyond, donating to independent media or
-              human-rights groups is now evidence that can be used against you. Cloak
-              breaks the public on-chain link between you and the cause, so support stops
-              being a confession.
+              Around the world, supporting democracy, a free press, and human rights can
+              make you a target - and a public blockchain donation is permanent proof of
+              who you backed. Cloak breaks the link between you and the cause, so standing
+              up for what you believe in no longer puts you at risk.
             </p>
             <div className="reveal mt-7 flex flex-wrap gap-3" style={{ animationDelay: "280ms" }}>
               <Link href="/create" className="rounded-full border border-border bg-surface/70 px-5 py-2.5 text-sm font-medium backdrop-blur transition hover:bg-accent-soft">
@@ -86,6 +87,9 @@ export default function Home() {
           </figcaption>
         </figure>
       </Container>
+
+      {/* It happens everywhere */}
+      <GlobalRepression />
 
       {/* How it works */}
       <Container id="how" className="scroll-mt-20 py-16">
@@ -148,15 +152,16 @@ export default function Home() {
           <h2 className="font-display text-3xl font-light tracking-tight">About Cloak</h2>
           <div className="space-y-4 text-base leading-7 text-foreground/85">
             <p>
-              Cloak was built at the ctrl/shift 2026 hackathon around one idea: in much of
-              the world, supporting a cause publicly is the danger, not the cause itself.
-              People self-censor their generosity because a blockchain donation is a
-              permanent, public record of who they support.
+              Cloak was built at the ctrl/shift 2026 hackathon around one idea: defending
+              democracy, free expression, and human rights should not require courage you
+              can be punished for. In dozens of countries, donating to independent media or
+              a rights group is treated as a crime, and a public blockchain donation is
+              permanent proof of who you supported.
             </p>
             <p>
-              Cloak uses accountable privacy so people can give without that risk, and so
-              causes can still prove the money they receive is clean. It is one honest
-              layer of protection - not a promise of anonymity.
+              Cloak uses accountable privacy so people can stand behind these freedoms
+              without that risk, while causes can still prove the money they receive is
+              clean. It is one honest layer of protection - not a promise of anonymity.
             </p>
           </div>
         </div>
