@@ -4,6 +4,7 @@ import { ThreatModelPanel } from "@/components/ThreatModelPanel";
 import { DonateWidget } from "@/components/DonateWidget";
 import { GlobalRepression } from "@/components/GlobalRepression";
 import { ImpactStats } from "@/components/ImpactStats";
+import { WhoFor } from "@/components/WhoFor";
 import { getCauses } from "@/lib/causes";
 
 const STEPS = [
@@ -110,6 +111,9 @@ export default function Home() {
         </div>
       </Container>
 
+      {/* Who Cloak is for */}
+      <WhoFor />
+
       {/* Cases - expandable */}
       <Container className="py-8">
         <h2 className="font-display max-w-md text-3xl font-light leading-snug tracking-tight">
@@ -173,14 +177,18 @@ export default function Home() {
             <p>
               Cloak was built at the ctrl/shift 2026 hackathon around one idea: defending
               democracy, free expression, and human rights should not require courage you
-              can be punished for. In dozens of countries, donating to independent media or
-              a rights group is treated as a crime, and the money trail - card, bank, or a
-              public blockchain - is permanent proof of who you supported.
+              can be punished for. In dozens of countries, supporting independent media, an
+              LGBTQ+ group, a reproductive-health fund, a banned faith, or humanitarian aid
+              in a sanctioned region is treated as a crime - and the money trail, by card,
+              bank, or public blockchain, is permanent proof of who you backed.
             </p>
             <p>
-              Cloak uses accountable privacy so people can stand behind these freedoms
-              without that risk, while causes can still prove the money they receive is
-              clean. It is one honest layer of protection - not a promise of anonymity.
+              The problem is not that people stopped caring - giving simply became a legal
+              risk. In Norvelia, even a small transfer to the wrong cause can trigger a
+              criminal case, so supporters were pushed toward cash, the diaspora, and
+              crypto. Cloak makes that channel safe and accountable: people keep giving, the
+              cause can still prove the funds are clean, and no public trail ties the two
+              together. It is one honest layer of protection - not a promise of anonymity.
             </p>
           </div>
         </div>
