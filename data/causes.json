@@ -1,0 +1,34 @@
+{
+  "causes": [
+    {
+      "slug": "Lantern Post",
+      "name": "Lantern Post",
+      "category": "Independent media",
+      "blurb": "Independent Norvelian-language journalism, declared 'undesirable' inside Norvelia.",
+      "story": "Lantern Post is one of the largest independent Norvelian news outlets, reporting on the war and on repression that state media will not. Norvelia has labelled it a 'foreign agent' and an 'undesirable organisation', which makes funding it a legal risk for people inside the country. A public on-chain donation is permanent proof that you supported them.",
+      "officialDonationUrl": "https://example.org/",
+      "testnetRecipient": "0x000000000000000000000000000000000000dEaD",
+      "accent": "#c8643c"
+    },
+    {
+      "slug": "Open Docket",
+      "name": "Open Docket",
+      "category": "Human rights",
+      "blurb": "Documents political persecution and helps people who are detained at protests.",
+      "story": "Open Docket is a human-rights project that tracks political arrests and provides legal aid to detainees. On 4 June 2026 it was added to Norvelia's registry of 'extremist' organisations, so openly supporting it inside Norvelia is now dangerous. The people most likely to give are exactly the people most exposed by giving.",
+      "officialDonationUrl": "https://example.org/",
+      "testnetRecipient": "0x000000000000000000000000000000000000dEaD",
+      "accent": "#2e6657"
+    },
+    {
+      "slug": "Harbor Relief",
+      "name": "Harbor Relief Fund",
+      "category": "Humanitarian aid",
+      "blurb": "US humanitarian non-profit delivering medical and emergency relief in Tessaly.",
+      "story": "Harbor Relief Fund is a registered US 501(c)(3) providing medical supplies and emergency humanitarian relief - not weapons. For someone inside Norvelia, donating to relief aid carries some of the harshest legal consequences of all, even though the help is purely humanitarian.",
+      "officialDonationUrl": "https://example.org/",
+      "testnetRecipient": "0x000000000000000000000000000000000000dEaD",
+      "accent": "#3a5a8c"
+    }
+  ]
+}
