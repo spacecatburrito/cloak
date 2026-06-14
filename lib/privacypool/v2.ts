@@ -19,6 +19,34 @@ const IPFS_GATEWAY_URLS = [
 const DERIVATION_MESSAGE =
   "Cloak: derive my private donation keys.\nSign to continue. This is not a transaction and costs nothing.";
 
+/**
+ * DEFAULT_CIRCUIT_MANIFEST ships its *Sha256 hashes without a 0x prefix, but the
+ * builder's own schema requires 0x-prefixed hex. Without this, PoolSessionBuilder
+ * .create() throws and every V2 operation silently falls back. Add the prefix.
+ */
+function patchCircuitManifest(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  manifest: Record<string, any>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Record<string, any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const out: Record<string, any> = {};
+  for (const [circuit, fields] of Object.entries(manifest)) {
+    out[circuit] = { ...fields };
+    for (const key of Object.keys(fields)) {
+      const v = fields[key];
+      if (/Sha256$/i.test(key) && typeof v === "string" && !v.startsWith("0x")) {
+        out[circuit][key] = "0x" + v;
+      }
+    }
+  }
+  return out;
+}
+
+const CIRCUIT_MANIFEST = patchCircuitManifest(
+  DEFAULT_CIRCUIT_MANIFEST as unknown as Record<string, unknown>,
+);
+
 type SendTx = (tx: { to: Address; data: Hex; value: bigint }) => Promise<Hex>;
 
 type BaseDeps = {
@@ -53,7 +81,7 @@ async function buildSession(ownerAddress: Address, signMessage: BaseDeps["signMe
     protocolKeys,
     ipfsGatewayUrl: IPFS_GATEWAY_URLS[0],
     circuitGatewayUrls: [...IPFS_GATEWAY_URLS],
-    circuitManifest: DEFAULT_CIRCUIT_MANIFEST,
+    circuitManifest: CIRCUIT_MANIFEST,
     relayers: [
       {
         name: "0xbow staging relayer",

@@ -1,24 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { createPublicClient, http, parseEther, isAddress, toHex, formatEther } from "viem";
+import { parseEther, isAddress, toHex, formatEther } from "viem";
 import { sepolia } from "viem/chains";
 import {
   useAccount,
   useConnect,
   useSwitchChain,
-  useWriteContract,
   useSignMessage,
   useSendTransaction,
   useBalance,
 } from "wagmi";
 import * as Sentry from "@sentry/nextjs";
 import type { Cause } from "@/lib/causes";
-import {
-  ENTRYPOINT_DEPOSIT_ABI,
-  buildDepositNote,
-  saveDepositNote,
-} from "@/lib/privacypool/deposit";
 import { simulateWithdrawal, type Disbursement } from "@/lib/privacypool/simulate";
 import {
   depositForViaV2,
@@ -26,13 +20,7 @@ import {
   withdrawToCauseViaV2,
   NOT_APPROVED,
 } from "@/lib/privacypool/v2";
-import {
-  ENTRYPOINT_ADDRESS,
-  RPC_URL,
-  USE_V2,
-  RELAYER_URL,
-  explorerTx,
-} from "@/lib/privacypool/config";
+import { RELAYER_URL, explorerTx } from "@/lib/privacypool/config";
 import { recordGift } from "@/lib/impact";
 import { Receipt } from "@/components/Receipt";
 import { useMethod } from "@/components/MethodContext";
@@ -40,8 +28,6 @@ import { useMethod } from "@/components/MethodContext";
 const PRESETS = ["0.005", "0.01", "0.05"];
 type Step = "form" | "depositing" | "disbursing" | "done";
 const CUSTOM = "__custom__";
-
-const publicClient = createPublicClient({ chain: sepolia, transport: http(RPC_URL) });
 
 export function DonateWidget({
   causes,
@@ -74,7 +60,6 @@ export function DonateWidget({
   const { isConnected, address, chainId } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain();
-  const { writeContractAsync } = useWriteContract();
   const { signMessageAsync } = useSignMessage();
   const { sendTransactionAsync } = useSendTransaction();
   const { data: balanceData } = useBalance({
@@ -128,97 +113,82 @@ export function DonateWidget({
       return;
     }
     try {
-      if (!isConnected) {
+      // Resolve the owner address from the connect result to avoid a stale closure.
+      let ownerAddress = address;
+      if (!isConnected || !ownerAddress) {
         const connector = connectors.find((c) => c.id === "injected") ?? connectors[0];
         if (!connector) throw new Error("No wallet found. Install MetaMask or Rabby.");
-        await connectAsync({ connector });
+        const res = await connectAsync({ connector });
+        ownerAddress = (res.accounts?.[0] as `0x${string}`) ?? ownerAddress;
       }
+      if (!ownerAddress) throw new Error("Could not read your wallet address.");
       if (chainId !== sepolia.id) {
         await switchChainAsync({ chainId: sepolia.id }).catch(() => {
           throw new Error("Please switch your wallet to the Sepolia testnet.");
         });
       }
 
-      // 2-STEP: deposit into your own pool balance now; withdraw to the cause
-      // yourself later at the Privacy Pools app once the deposit settles.
+      const amountWeiHex = toHex(parseEther(amount));
+      const signMessage = (message: string) => signMessageAsync({ message });
+      const sendTransaction = ({
+        to,
+        data,
+        value,
+      }: {
+        to: `0x${string}`;
+        data: `0x${string}`;
+        value: bigint;
+      }) => sendTransactionAsync({ to, data, value });
+
+      // 2-STEP: real self-deposit into your own pool balance; withdraw in step 2.
       if (method === "2step") {
         setStep("depositing");
-        let hash: `0x${string}` | undefined;
-        if (USE_V2 && address) {
-          try {
-            hash = await depositToSelfViaV2({
-              ownerAddress: address,
-              amountWeiHex: toHex(parseEther(amount)),
-              signMessage: (message) => signMessageAsync({ message }),
-              sendTransaction: ({ to, data, value }) => sendTransactionAsync({ to, data, value }),
-              onStep: setStepNote,
-            });
-          } catch (e) {
-            Sentry.captureException(e);
-            setStepNote("Using a direct deposit…");
-          }
-        }
-        if (!hash) {
-          const note = buildDepositNote();
-          hash = await writeContractAsync({
-            address: ENTRYPOINT_ADDRESS,
-            abi: ENTRYPOINT_DEPOSIT_ABI,
-            functionName: "deposit",
-            args: [note.precommitment],
-            value: parseEther(amount),
-            chainId: sepolia.id,
-          });
-          saveDepositNote(note.mnemonic, hash);
-          await publicClient.waitForTransactionReceipt({ hash });
-        }
+        const hash = await depositToSelfViaV2({
+          ownerAddress,
+          amountWeiHex,
+          signMessage,
+          sendTransaction,
+          onStep: setStepNote,
+        });
         setTwoStepTx(hash);
         setTwoStepDone(true);
         setStep("form");
         return;
       }
 
-      // Preferred path: real V2 depositFor - one transaction straight to the
-      // cause, no simulated step. Falls back to the path below on any error.
-      if (USE_V2 && address) {
-        try {
-          setStep("depositing");
-          const hash = await depositForViaV2({
-            ownerAddress: address,
-            recipient: recipient as `0x${string}`,
-            amountWeiHex: toHex(parseEther(amount)),
-            signMessage: (message) => signMessageAsync({ message }),
-            sendTransaction: ({ to, data, value }) =>
-              sendTransactionAsync({ to, data, value }),
-            onStep: setStepNote,
-          });
-          setDepositTx(hash);
-          setDisbursement({ txHash: hash, simulated: false });
-          recordGift(isCustom ? "custom" : selected, parseFloat(amount) || 0);
-          setStep("done");
-          return;
-        } catch (e) {
-          Sentry.captureException(e);
-          setStepNote("Real path unavailable, using the safe demo path…");
-          // fall through to the deposit + simulated-disbursement path below
-        }
+      // 1-STEP: deposit straight to the cause via depositFor (works when the cause
+      // is a registered Privacy Pools account).
+      setStep("depositing");
+      try {
+        const hash = await depositForViaV2({
+          ownerAddress,
+          recipient: recipient as `0x${string}`,
+          amountWeiHex,
+          signMessage,
+          sendTransaction,
+          onStep: setStepNote,
+        });
+        setDepositTx(hash);
+        setDisbursement({ txHash: hash, simulated: false });
+        recordGift(isCustom ? "custom" : selected, parseFloat(amount) || 0);
+        setStep("done");
+        return;
+      } catch (e) {
+        // Most causes aren't registered Privacy Pools accounts, so a one-tx
+        // depositFor isn't possible. Do a real self-deposit and clearly simulate
+        // the delivery (switch to 2-step to complete the real private withdrawal).
+        Sentry.captureException(e);
+        setStepNote("Direct-to-cause needs a registered account; depositing to your balance…");
       }
 
-      // 1. Real on-chain deposit into the Privacy Pool.
-      setStep("depositing");
-      const note = buildDepositNote();
-      const hash = await writeContractAsync({
-        address: ENTRYPOINT_ADDRESS,
-        abi: ENTRYPOINT_DEPOSIT_ABI,
-        functionName: "deposit",
-        args: [note.precommitment],
-        value: parseEther(amount),
-        chainId: sepolia.id,
+      const depHash = await depositToSelfViaV2({
+        ownerAddress,
+        amountWeiHex,
+        signMessage,
+        sendTransaction,
+        onStep: setStepNote,
       });
-      setDepositTx(hash);
-      saveDepositNote(note.mnemonic, hash);
-      await publicClient.waitForTransactionReceipt({ hash });
-
-      // 2. Private disbursement to the recipient (simulated by default).
+      setDepositTx(depHash);
       setStep("disbursing");
       const disb = await simulateWithdrawal(recipient, amount);
       setDisbursement(disb);
