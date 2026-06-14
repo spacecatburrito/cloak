@@ -20,8 +20,19 @@ import {
   saveDepositNote,
 } from "@/lib/privacypool/deposit";
 import { simulateWithdrawal, type Disbursement } from "@/lib/privacypool/simulate";
-import { depositForViaV2, depositToSelfViaV2 } from "@/lib/privacypool/v2";
-import { ENTRYPOINT_ADDRESS, RPC_URL, USE_V2, explorerTx } from "@/lib/privacypool/config";
+import {
+  depositForViaV2,
+  depositToSelfViaV2,
+  withdrawToCauseViaV2,
+  NOT_APPROVED,
+} from "@/lib/privacypool/v2";
+import {
+  ENTRYPOINT_ADDRESS,
+  RPC_URL,
+  USE_V2,
+  RELAYER_URL,
+  explorerTx,
+} from "@/lib/privacypool/config";
 import { recordGift } from "@/lib/impact";
 import { Receipt } from "@/components/Receipt";
 import { useMethod } from "@/components/MethodContext";
@@ -54,6 +65,8 @@ export function DonateWidget({
   const [twoStepTx, setTwoStepTx] = useState("");
   const [twoStepDone, setTwoStepDone] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [withdrawMsg, setWithdrawMsg] = useState("");
 
   const { method } = useMethod();
 
@@ -239,6 +252,44 @@ export function DonateWidget({
     setError(null);
     setTwoStepDone(false);
     setTwoStepTx("");
+    setWithdrawMsg("");
+  }
+
+  // Step 2, in-app: withdraw the approved deposit privately to the cause via the relayer.
+  async function handleWithdraw() {
+    if (!address) return;
+    setWithdrawing(true);
+    setWithdrawMsg("");
+    setError(null);
+    setStepNote("");
+    try {
+      const hash = await withdrawToCauseViaV2({
+        ownerAddress: address,
+        recipient: recipient as `0x${string}`,
+        signMessage: (message) => signMessageAsync({ message }),
+        onStep: setStepNote,
+      });
+      setDepositTx(twoStepTx);
+      setDisbursement({ txHash: hash, simulated: false });
+      recordGift(isCustom ? "custom" : selected, parseFloat(amount) || 0);
+      setTwoStepDone(false);
+      setStep("done");
+    } catch (e: unknown) {
+      const msg = (e as { message?: string })?.message || "";
+      if (msg === NOT_APPROVED) {
+        setWithdrawMsg(
+          "Your deposit isn't approved by the Association Set yet (usually ~10-15 min). Try again shortly.",
+        );
+      } else {
+        Sentry.captureException(e);
+        setWithdrawMsg(
+          "Couldn't complete the withdrawal in-app. You can finish it at the Privacy Pools app below.",
+        );
+      }
+    } finally {
+      setWithdrawing(false);
+      setStepNote("");
+    }
   }
 
   return (
@@ -267,28 +318,10 @@ export function DonateWidget({
             <h3 className="font-display text-2xl font-light tracking-tight">Deposit done</h3>
           </div>
           <p className="mt-2 text-sm text-muted">
-            Your ETH is now in the Privacy Pool. Finish the private withdrawal yourself:
+            Your ETH is in the Privacy Pool. Once the Association Set approves it (usually
+            ~10-15 min), withdraw it privately to {recipientName}:
           </p>
-          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-foreground/90 marker:text-muted">
-            <li>
-              <span className="font-medium">Wait ~10-15 min.</span> The Association Set must
-              approve your deposit before it can be withdrawn.
-            </li>
-            <li>
-              Open the Privacy Pools app and{" "}
-              <span className="font-medium">connect the same wallet</span> you deposited from,
-              so it can see your pool balance.
-            </li>
-            <li>
-              Choose <span className="font-medium">Withdraw</span>, paste {recipientName}
-              &rsquo;s address (below) as the recipient, and set the amount.
-            </li>
-            <li>
-              Keep <span className="font-medium">send via relayer</span> on for gas privacy,
-              then confirm. {recipientName} receives the funds with no link to you.
-            </li>
-          </ol>
-          <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-foreground/5 p-2">
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-foreground/5 p-2">
             <code className="flex-1 break-all text-xs">{recipient}</code>
             <button
               onClick={copyRecipient}
@@ -297,12 +330,25 @@ export function DonateWidget({
               {copied ? "Copied" : "Copy"}
             </button>
           </div>
-          <div className="mt-5 flex flex-wrap items-center gap-4">
+
+          {RELAYER_URL && (
+            <button
+              onClick={handleWithdraw}
+              disabled={withdrawing}
+              className="mt-4 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              {withdrawing ? stepNote || "Withdrawing…" : `Withdraw to ${recipientName} now`}
+            </button>
+          )}
+          {withdrawMsg && <p className="mt-2 text-xs text-foreground/80">{withdrawMsg}</p>}
+
+          <div className="mt-5 flex flex-wrap items-center gap-4 text-sm">
+            <span className="text-muted">Or finish manually:</span>
             <a
               href="https://testnet.privacypools.com"
               target="_blank"
               rel="noreferrer"
-              className="rounded-full bg-accent px-5 py-3 font-medium text-white hover:opacity-90"
+              className="font-medium text-accent hover:underline"
             >
               Open Privacy Pools ↗
             </a>
@@ -310,7 +356,7 @@ export function DonateWidget({
               href={explorerTx(twoStepTx)}
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-medium text-accent hover:underline"
+              className="font-medium text-accent hover:underline"
             >
               View your deposit ↗
             </a>

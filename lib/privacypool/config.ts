@@ -10,11 +10,11 @@ export const CHAIN = sepolia;
 export const RPC_URL =
   process.env.NEXT_PUBLIC_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
 
-/** Deployed Sepolia native-ETH Privacy Pool + its entrypoint. */
+/** Current Privacy Pools v2 Sepolia deployment (matches the SDK DEPLOYMENTS table). */
 export const POOL_ADDRESS: Address =
-  "0x644d5A2554d36e27509254F32ccfeBe8cd58861f";
+  "0x09b94d3127019298757A6ceeB7911922085f7C01";
 export const ENTRYPOINT_ADDRESS: Address =
-  "0x34A2068192b1297f2a7f85D7D8CdE66F8F0921cB";
+  "0xEB3e3961008952348445513e418ad6F43C23ca9a";
 
 /** Pool max deposit is 1 ETH on testnet; we use small demo amounts. */
 export const MAX_DEPOSIT_ETH = 1;
@@ -36,7 +36,21 @@ export const SIMULATE =
 export const USE_V2 = process.env.NEXT_PUBLIC_USE_V2 === "true";
 
 export const ASP_ENDPOINT = process.env.NEXT_PUBLIC_ASP_ENDPOINT || "";
-export const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL || "";
+
+/**
+ * Privacy Pools v2 staging relayer (Sepolia). Withdrawals must be relayed - the
+ * protocol rejects self-submitted withdrawals, which is what enforces privacy.
+ * Signer EOA + PrivacyPoolRelay processor are from the official deployment docs.
+ */
+export const RELAYER_URL =
+  process.env.NEXT_PUBLIC_RELAYER_URL ||
+  "https://relayer-v2-staging-149184580131.us-east1.run.app";
+export const RELAYER_ADDRESS: Address =
+  (process.env.NEXT_PUBLIC_RELAYER_ADDRESS as Address) ||
+  "0x4Ba5fF376865b370790A56276C63e7984DCFf1f7";
+export const RELAYER_PROCESSOR: Address =
+  (process.env.NEXT_PUBLIC_RELAYER_PROCESSOR as Address) ||
+  "0x87a5BFbAd7cA6B1FF3d9E631877B5930f17C24B0";
 
 export function explorerTx(hash: string): string {
   return `https://sepolia.etherscan.io/tx/${hash}`;

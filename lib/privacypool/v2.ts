@@ -4,7 +4,7 @@ import {
   DEFAULT_CIRCUIT_MANIFEST,
 } from "@0xbow-io/privacy-pools-v2-sdk";
 import { keccak256, type Address, type Hex } from "viem";
-import { RPC_URL } from "./config";
+import { RPC_URL, RELAYER_URL, RELAYER_ADDRESS, RELAYER_PROCESSOR } from "./config";
 
 // Defined locally: these are not reliably resolvable as named runtime exports
 // of the V2 SDK under the bundler. The ETH sentinel is the protocol constant.
@@ -56,10 +56,10 @@ async function buildSession(ownerAddress: Address, signMessage: BaseDeps["signMe
     circuitManifest: DEFAULT_CIRCUIT_MANIFEST,
     relayers: [
       {
-        name: "self",
-        url: "https://relayer.invalid",
-        address: ownerAddress,
-        processorAddress: ownerAddress,
+        name: "0xbow staging relayer",
+        url: RELAYER_URL,
+        address: RELAYER_ADDRESS,
+        processorAddress: RELAYER_PROCESSOR,
         chainId: 11155111,
         chainType: "evm",
         status: "active",
@@ -130,4 +130,57 @@ export async function depositToSelfViaV2(deps: BaseDeps): Promise<Hex> {
   });
   onStep?.("Confirm the deposit in your wallet");
   return submitDeposit(dep, sendTransaction);
+}
+
+/** Thrown when the deposit isn't yet ASP-approved, so it can't be withdrawn. */
+export const NOT_APPROVED = "NOT_APPROVED";
+
+export type V2WithdrawDeps = {
+  ownerAddress: Address;
+  recipient: Address;
+  signMessage: (message: string) => Promise<Hex>;
+  onStep?: (label: string) => void;
+};
+
+/**
+ * Step 2, fully in-app: discover the user's deposited note. If the Association
+ * Set has approved it (note is ACTIVE), generate the withdrawal proof and submit
+ * it privately to the cause via the relayer. Throws NOT_APPROVED if the deposit
+ * is not yet withdrawable.
+ */
+export async function withdrawToCauseViaV2(deps: V2WithdrawDeps): Promise<Hex> {
+  const { ownerAddress, recipient, signMessage, onStep } = deps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const session: any = await buildSession(ownerAddress, signMessage, onStep);
+
+  onStep?.("Finding your deposit");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const notes: any[] = (session.getNotes ? session.getNotes() : []) || [];
+  const isEth = (t: string) =>
+    (t || "").toLowerCase() === NATIVE_ASSET_ADDRESS.toLowerCase();
+  const active = notes.find(
+    (n) =>
+      String(n.status).toUpperCase().includes("ACTIVE") &&
+      isEth(n.tokenId) &&
+      BigInt(n.value) > 0n,
+  );
+  if (!active) throw new Error(NOT_APPROVED);
+
+  onStep?.("Generating the withdrawal proof (can take a moment)");
+  const prep = await session.prepareWithdraw({
+    inputCommitments: [active.commitment],
+    amount: active.value,
+    tokenId: NATIVE_ASSET_ADDRESS,
+    recipientAddress: recipient,
+  });
+
+  const option = prep.relayerOptions?.[0];
+  if (!option) throw new Error("No relayer quote available.");
+
+  onStep?.("Submitting via relayer");
+  const res = await session.relayWithdraw(option);
+  const hash =
+    typeof res === "string" ? res : res?.txHash ?? res?.hash ?? res?.transactionHash;
+  if (!hash) throw new Error("Relayer did not return a transaction hash.");
+  return hash as Hex;
 }
