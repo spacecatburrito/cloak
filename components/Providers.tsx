@@ -6,6 +6,7 @@ import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as Sentry from "@sentry/nextjs";
+import { MethodProvider } from "@/components/MethodContext";
 import { RPC_URL } from "@/lib/privacypool/config";
 
 // mainnet is included so the wallet's real chain is tracked accurately (we only
@@ -29,7 +30,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <MethodProvider>{children}</MethodProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }

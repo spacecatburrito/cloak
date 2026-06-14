@@ -20,10 +20,11 @@ import {
   saveDepositNote,
 } from "@/lib/privacypool/deposit";
 import { simulateWithdrawal, type Disbursement } from "@/lib/privacypool/simulate";
-import { depositForViaV2 } from "@/lib/privacypool/v2";
-import { ENTRYPOINT_ADDRESS, RPC_URL, USE_V2 } from "@/lib/privacypool/config";
+import { depositForViaV2, depositToSelfViaV2 } from "@/lib/privacypool/v2";
+import { ENTRYPOINT_ADDRESS, RPC_URL, USE_V2, explorerTx } from "@/lib/privacypool/config";
 import { recordGift } from "@/lib/impact";
 import { Receipt } from "@/components/Receipt";
+import { useMethod } from "@/components/MethodContext";
 
 const PRESETS = ["0.005", "0.01", "0.05"];
 type Step = "form" | "depositing" | "disbursing" | "done";
@@ -50,6 +51,11 @@ export function DonateWidget({
   const [depositTx, setDepositTx] = useState("");
   const [disbursement, setDisbursement] = useState<Disbursement | null>(null);
   const [stepNote, setStepNote] = useState("");
+  const [twoStepTx, setTwoStepTx] = useState("");
+  const [twoStepDone, setTwoStepDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const { method } = useMethod();
 
   // chainId here is the wallet's ACTUAL connected chain (not the config default).
   const { isConnected, address, chainId } = useAccount();
@@ -120,6 +126,44 @@ export function DonateWidget({
         });
       }
 
+      // 2-STEP: deposit into your own pool balance now; withdraw to the cause
+      // yourself later at the Privacy Pools app once the deposit settles.
+      if (method === "2step") {
+        setStep("depositing");
+        let hash: `0x${string}` | undefined;
+        if (USE_V2 && address) {
+          try {
+            hash = await depositToSelfViaV2({
+              ownerAddress: address,
+              amountWeiHex: toHex(parseEther(amount)),
+              signMessage: (message) => signMessageAsync({ message }),
+              sendTransaction: ({ to, data, value }) => sendTransactionAsync({ to, data, value }),
+              onStep: setStepNote,
+            });
+          } catch (e) {
+            Sentry.captureException(e);
+            setStepNote("Using a direct deposit…");
+          }
+        }
+        if (!hash) {
+          const note = buildDepositNote();
+          hash = await writeContractAsync({
+            address: ENTRYPOINT_ADDRESS,
+            abi: ENTRYPOINT_DEPOSIT_ABI,
+            functionName: "deposit",
+            args: [note.precommitment],
+            value: parseEther(amount),
+            chainId: sepolia.id,
+          });
+          saveDepositNote(note.mnemonic, hash);
+          await publicClient.waitForTransactionReceipt({ hash });
+        }
+        setTwoStepTx(hash);
+        setTwoStepDone(true);
+        setStep("form");
+        return;
+      }
+
       // Preferred path: real V2 depositFor - one transaction straight to the
       // cause, no simulated step. Falls back to the path below on any error.
       if (USE_V2 && address) {
@@ -178,11 +222,23 @@ export function DonateWidget({
     }
   }
 
+  async function copyRecipient() {
+    try {
+      await navigator.clipboard.writeText(recipient);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard blocked */
+    }
+  }
+
   function reset() {
     setStep("form");
     setDisbursement(null);
     setDepositTx("");
     setError(null);
+    setTwoStepDone(false);
+    setTwoStepTx("");
   }
 
   return (
@@ -202,11 +258,73 @@ export function DonateWidget({
             Give again
           </button>
         </>
+      ) : twoStepDone ? (
+        <>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft font-medium text-accent">
+              1
+            </span>
+            <h3 className="font-display text-2xl font-light tracking-tight">Deposit done</h3>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Your funds are in the Privacy Pool. In about 10-15 minutes the deposit is
+            approved by the Association Set and becomes withdrawable.
+          </p>
+          <ol className="mt-4 space-y-2 text-sm text-foreground/90">
+            <li>
+              <span className="font-medium">Wait ~10-15 min</span> for the deposit to settle.
+            </li>
+            <li>
+              Open the Privacy Pools app and connect{" "}
+              <span className="font-medium">this same wallet</span>.
+            </li>
+            <li>Withdraw privately to {recipientName}, using this address:</li>
+          </ol>
+          <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-foreground/5 p-2">
+            <code className="flex-1 break-all text-xs">{recipient}</code>
+            <button
+              onClick={copyRecipient}
+              className="rounded-full border border-border px-3 py-1 text-xs font-medium hover:bg-accent-soft"
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+          <div className="mt-5 flex flex-wrap items-center gap-4">
+            <a
+              href="https://testnet.privacypools.com"
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-full bg-accent px-5 py-3 font-medium text-white hover:opacity-90"
+            >
+              Open Privacy Pools ↗
+            </a>
+            <a
+              href={explorerTx(twoStepTx)}
+              target="_blank"
+              rel="noreferrer"
+              className="text-sm font-medium text-accent hover:underline"
+            >
+              View your deposit ↗
+            </a>
+          </div>
+          <p className="mt-5 rounded-lg bg-foreground/5 p-3 text-xs leading-5 text-muted">
+            Honest note: the withdrawal is completed at the Privacy Pools app with the same
+            wallet so it can see your deposit. This keeps your gift unlinked from the cause.
+          </p>
+          <button
+            onClick={reset}
+            className="mt-4 w-full rounded-full border border-border px-5 py-3 font-medium hover:bg-accent-soft"
+          >
+            Done
+          </button>
+        </>
       ) : (
         <>
           <h3 className="font-display text-2xl font-light tracking-tight">Give privately</h3>
           <p className="mt-1 text-sm text-muted">
-            Send from your wallet. No public link back to you.
+            {method === "2step"
+              ? "Step 1: deposit to your own pool balance. You finish the private withdrawal yourself."
+              : "Send from your wallet. No public link back to you."}
           </p>
 
           {/* Network badge - always explicit about which chain this runs on */}
@@ -341,11 +459,15 @@ export function DonateWidget({
           {busy && (
             <ol className="mt-5 space-y-1.5 text-sm">
               <li className={step === "depositing" ? "font-medium text-accent" : "text-muted"}>
-                1. Depositing into the Privacy Pool…
+                {method === "2step"
+                  ? "Depositing to your private balance…"
+                  : "1. Depositing into the Privacy Pool…"}
               </li>
-              <li className={step === "disbursing" ? "font-medium text-accent" : "text-muted"}>
-                2. Sending privately to {recipientName}…
-              </li>
+              {method !== "2step" && (
+                <li className={step === "disbursing" ? "font-medium text-accent" : "text-muted"}>
+                  2. Sending privately to {recipientName}…
+                </li>
+              )}
             </ol>
           )}
 
@@ -375,9 +497,11 @@ export function DonateWidget({
                 ? step === "depositing"
                   ? "Confirm in your wallet…"
                   : "Sending privately…"
-                : isConnected
-                  ? `Give ${amount} ETH to ${recipientName}`
-                  : "Connect wallet & give"}
+                : !isConnected
+                  ? "Connect wallet & give"
+                  : method === "2step"
+                    ? `Deposit ${amount} ETH to your balance`
+                    : `Give ${amount} ETH to ${recipientName}`}
             </button>
           )}
         </>

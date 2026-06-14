@@ -118,10 +118,24 @@ export default function Home() {
         <div className="mt-8 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
           {causes.map((c) => (
             <details key={c.slug} className="group px-6 py-5">
-              <summary className="flex cursor-pointer items-center justify-between gap-4 list-none">
+              <summary className="flex cursor-pointer items-start justify-between gap-4 list-none transition hover:opacity-80">
                 <span className="flex flex-col">
                   <span className="font-display text-xl font-light">{c.name}</span>
                   <span className="text-sm text-muted">{c.blurb}</span>
+                  <span className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-accent">
+                    <span className="group-open:hidden">Why it matters</span>
+                    <span className="hidden group-open:inline">Show less</span>
+                    <svg
+                      viewBox="0 0 12 12"
+                      aria-hidden
+                      className="h-3 w-3 transition-transform group-open:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M3 4.5 L6 7.5 L9 4.5" />
+                    </svg>
+                  </span>
                 </span>
                 <span
                   className="shrink-0 rounded-full px-3 py-1 text-xs font-medium"
@@ -193,6 +207,14 @@ export default function Home() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted">Powered by</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/vendor/0xbow.svg" alt="0xbow Privacy Pools" className="h-8 w-auto" />
+          <div className="flex items-center gap-2 rounded-full border border-border px-4 py-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/vendor/dedaub.svg" alt="Dedaub" className="h-5 w-5" />
+            <span className="text-sm font-semibold tracking-tight">Audited by Dedaub</span>
+            <span className="rounded-full bg-warm-soft px-2 py-0.5 text-xs font-medium text-warm">
+              Coming soon
+            </span>
+          </div>
           <p className="max-w-md text-sm text-muted">
             Cloak deploys no new smart contracts. It calls 0xbow&rsquo;s deployed,
             open-source Privacy Pools v2 contracts directly, so it adds no new on-chain

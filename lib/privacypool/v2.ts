@@ -16,38 +16,26 @@ const IPFS_GATEWAY_URLS = [
   "https://cloudflare-ipfs.com/ipfs",
 ];
 
-/**
- * Real Privacy Pools V2 "depositFor" flow: the donor deposits straight to the
- * cause's account inside the pool, so the donation reaches the recipient in one
- * real on-chain transaction with no public donor->cause link, and no separate
- * withdrawal step.
- *
- * This is a cold-start ZK deposit. It requires: a wallet signature to derive
- * protocol keys, a one-time on-chain keystore registration, and an in-browser
- * Groth16 proof using circuit artifacts fetched from IPFS. Heavy and wallet-
- * interactive - the caller wraps it with a fallback so a demo never breaks.
- */
 const DERIVATION_MESSAGE =
   "Cloak: derive my private donation keys.\nSign to continue. This is not a transaction and costs nothing.";
 
 type SendTx = (tx: { to: Address; data: Hex; value: bigint }) => Promise<Hex>;
 
-export type V2DepositDeps = {
+type BaseDeps = {
   ownerAddress: Address;
-  recipient: Address;
   amountWeiHex: Hex;
   signMessage: (message: string) => Promise<Hex>;
   sendTransaction: SendTx;
   onStep?: (label: string) => void;
 };
 
-export async function depositForViaV2(deps: V2DepositDeps): Promise<Hex> {
-  const { ownerAddress, recipient, amountWeiHex, signMessage, sendTransaction, onStep } = deps;
+export type V2DepositDeps = BaseDeps & { recipient: Address };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function buildSession(ownerAddress: Address, signMessage: BaseDeps["signMessage"], onStep?: BaseDeps["onStep"]): Promise<any> {
   onStep?.("Sign to derive your private keys");
   const signature = await signMessage(DERIVATION_MESSAGE);
 
-  // Two-stage HKDF key derivation from the signature (no on-chain cost).
   const crypto = new CryptoService();
   const derived = crypto.deriveKeysFromSignature({
     signature,
@@ -58,8 +46,7 @@ export async function depositForViaV2(deps: V2DepositDeps): Promise<Hex> {
   const protocolKeys = { ...derived, revocableKeyIndex: "0x0" };
 
   onStep?.("Preparing the private pool session");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const session = await PoolSessionBuilder.create({
+  return PoolSessionBuilder.create({
     chainId: 11155111,
     rpcUrl: RPC_URL,
     ownerAddress,
@@ -80,32 +67,28 @@ export async function depositForViaV2(deps: V2DepositDeps): Promise<Hex> {
     ],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
+}
 
-  // One-time keystore registration for this account.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function ensureKeystore(session: any, sendTransaction: SendTx, onStep?: BaseDeps["onStep"]) {
   const registered = await session.isKeystoreRegistered();
-  if (!registered) {
-    onStep?.("Registering your keystore (one-time)");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const reg: Record<string, any> = await session.prepareRegisterKeystore();
-    for (const v of Object.values(reg)) {
-      if (v && typeof v === "object" && "to" in v && "data" in v) {
-        await sendTransaction({
-          to: v.to as Address,
-          data: v.data as Hex,
-          value: BigInt(v.value ?? "0x0"),
-        });
-      }
+  if (registered) return;
+  onStep?.("Registering your keystore (one-time)");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const reg: Record<string, any> = await session.prepareRegisterKeystore();
+  for (const v of Object.values(reg)) {
+    if (v && typeof v === "object" && "to" in v && "data" in v) {
+      await sendTransaction({
+        to: v.to as Address,
+        data: v.data as Hex,
+        value: BigInt(v.value ?? "0x0"),
+      });
     }
   }
+}
 
-  onStep?.("Generating the private proof (can take a moment)");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const dep: any = await session.prepareDepositFor({
-    tokenId: NATIVE_ASSET_ADDRESS,
-    value: amountWeiHex,
-    discoveryData: { evmAddress: recipient },
-  });
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function submitDeposit(dep: any, sendTransaction: SendTx): Promise<Hex> {
   if (dep.approvalTx) {
     await sendTransaction({
       to: dep.approvalTx.to,
@@ -113,11 +96,38 @@ export async function depositForViaV2(deps: V2DepositDeps): Promise<Hex> {
       value: BigInt(dep.approvalTx.value ?? "0x0"),
     });
   }
-
-  onStep?.("Confirm the deposit in your wallet");
   return sendTransaction({
     to: dep.to,
     data: dep.callData,
     value: BigInt(dep.msgValue ?? "0x0"),
   });
+}
+
+/** 1-step: deposit straight to the cause's account (no separate withdrawal). */
+export async function depositForViaV2(deps: V2DepositDeps): Promise<Hex> {
+  const { ownerAddress, recipient, amountWeiHex, signMessage, sendTransaction, onStep } = deps;
+  const session = await buildSession(ownerAddress, signMessage, onStep);
+  await ensureKeystore(session, sendTransaction, onStep);
+  onStep?.("Generating the private proof (can take a moment)");
+  const dep = await session.prepareDepositFor({
+    tokenId: NATIVE_ASSET_ADDRESS,
+    value: amountWeiHex,
+    discoveryData: { evmAddress: recipient },
+  });
+  onStep?.("Confirm the deposit in your wallet");
+  return submitDeposit(dep, sendTransaction);
+}
+
+/** 2-step: deposit into your OWN pool balance; withdraw later (e.g. at the Privacy Pools app). */
+export async function depositToSelfViaV2(deps: BaseDeps): Promise<Hex> {
+  const { ownerAddress, amountWeiHex, signMessage, sendTransaction, onStep } = deps;
+  const session = await buildSession(ownerAddress, signMessage, onStep);
+  await ensureKeystore(session, sendTransaction, onStep);
+  onStep?.("Generating your deposit");
+  const dep = await session.prepareDeposit({
+    tokenId: NATIVE_ASSET_ADDRESS,
+    value: amountWeiHex,
+  });
+  onStep?.("Confirm the deposit in your wallet");
+  return submitDeposit(dep, sendTransaction);
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MethodToggle } from "@/components/MethodToggle";
 
 export function Container({
   children,
@@ -35,8 +36,9 @@ export function SiteHeader() {
     <header className="border-b border-border bg-surface/70 backdrop-blur">
       <Container className="flex h-16 items-center justify-between">
         <Logo />
-        <nav className="flex items-center gap-5 text-sm text-muted">
-          <Link href="/gallery" className="hover:text-foreground">
+        <nav className="flex items-center gap-3 text-sm text-muted sm:gap-5">
+          <MethodToggle />
+          <Link href="/gallery" className="hidden hover:text-foreground sm:inline">
             Causes
           </Link>
           <Link href="/create" className="hover:text-foreground">
