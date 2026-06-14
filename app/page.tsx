@@ -249,4 +249,8 @@ const FAQ = [
     q: "Can I raise funds for my own cause?",
     a: "Yes. Create a donation page in seconds, then share the link or embed the widget on your own site - no account needed.",
   },
+  {
+    q: "How do I use the 2-step method?",
+    a: "Set the toggle at the top of the page to \"2 steps\". Step 1: connect your wallet and deposit ETH into your own balance inside the Privacy Pool - a single on-chain transaction. Step 2: wait about 10-15 minutes for the deposit to be approved by the Association Set, then open the Privacy Pools app, connect the same wallet, and withdraw privately to the cause's address (Cloak shows it for you to copy). Because the deposit and the withdrawal are unlinked, there is no public trail from you to the cause. The 1-step method does both at once; the 2-step method gives you more control and completes the withdrawal in the official Privacy Pools app.",
+  },
 ];
