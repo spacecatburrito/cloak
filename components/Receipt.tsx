@@ -19,10 +19,14 @@ export function Receipt({
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent">
           ✓
         </span>
-        <h3 className="text-lg font-semibold tracking-tight">Private gift sent</h3>
+        <h3 className="text-lg font-semibold tracking-tight">
+          {disbursement.simulated ? "Deposited to the pool" : "Private gift sent"}
+        </h3>
       </div>
       <p className="mt-2 text-sm text-muted">
-        {amount} ETH reached {cause.name} with no public link back to your wallet.
+        {disbursement.simulated
+          ? `${amount} ETH is in the Privacy Pool under your control. Delivery to ${cause.name} is simulated in this demo - switch to 2-step to complete the real private withdrawal.`
+          : `${amount} ETH reached ${cause.name} with no public link back to your wallet.`}
       </p>
 
       <dl className="mt-5 space-y-3 text-sm">
