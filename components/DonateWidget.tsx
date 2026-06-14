@@ -267,18 +267,26 @@ export function DonateWidget({
             <h3 className="font-display text-2xl font-light tracking-tight">Deposit done</h3>
           </div>
           <p className="mt-2 text-sm text-muted">
-            Your funds are in the Privacy Pool. In about 10-15 minutes the deposit is
-            approved by the Association Set and becomes withdrawable.
+            Your ETH is now in the Privacy Pool. Finish the private withdrawal yourself:
           </p>
-          <ol className="mt-4 space-y-2 text-sm text-foreground/90">
+          <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-foreground/90 marker:text-muted">
             <li>
-              <span className="font-medium">Wait ~10-15 min</span> for the deposit to settle.
+              <span className="font-medium">Wait ~10-15 min.</span> The Association Set must
+              approve your deposit before it can be withdrawn.
             </li>
             <li>
-              Open the Privacy Pools app and connect{" "}
-              <span className="font-medium">this same wallet</span>.
+              Open the Privacy Pools app and{" "}
+              <span className="font-medium">connect the same wallet</span> you deposited from,
+              so it can see your pool balance.
             </li>
-            <li>Withdraw privately to {recipientName}, using this address:</li>
+            <li>
+              Choose <span className="font-medium">Withdraw</span>, paste {recipientName}
+              &rsquo;s address (below) as the recipient, and set the amount.
+            </li>
+            <li>
+              Keep <span className="font-medium">send via relayer</span> on for gas privacy,
+              then confirm. {recipientName} receives the funds with no link to you.
+            </li>
           </ol>
           <div className="mt-2 flex items-center gap-2 rounded-lg border border-border bg-foreground/5 p-2">
             <code className="flex-1 break-all text-xs">{recipient}</code>
@@ -309,7 +317,7 @@ export function DonateWidget({
           </div>
           <p className="mt-5 rounded-lg bg-foreground/5 p-3 text-xs leading-5 text-muted">
             Honest note: the withdrawal is completed at the Privacy Pools app with the same
-            wallet so it can see your deposit. This keeps your gift unlinked from the cause.
+            wallet so it can see your deposit. This keeps your donation unlinked from the cause.
           </p>
           <button
             onClick={reset}
