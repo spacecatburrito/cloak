@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { createPublicClient, http, parseEther, isAddress } from "viem";
+import { createPublicClient, http, parseEther, isAddress, toHex } from "viem";
 import { sepolia } from "viem/chains";
-import { useAccount, useConnect, useChainId, useSwitchChain, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useChainId,
+  useSwitchChain,
+  useWriteContract,
+  useSignMessage,
+  useSendTransaction,
+} from "wagmi";
 import * as Sentry from "@sentry/nextjs";
 import type { Cause } from "@/lib/causes";
 import {
@@ -12,7 +20,8 @@ import {
   saveDepositNote,
 } from "@/lib/privacypool/deposit";
 import { simulateWithdrawal, type Disbursement } from "@/lib/privacypool/simulate";
-import { ENTRYPOINT_ADDRESS, RPC_URL, SIMULATE } from "@/lib/privacypool/config";
+import { depositForViaV2 } from "@/lib/privacypool/v2";
+import { ENTRYPOINT_ADDRESS, RPC_URL, USE_V2 } from "@/lib/privacypool/config";
 import { recordGift } from "@/lib/impact";
 import { Receipt } from "@/components/Receipt";
 
@@ -38,12 +47,15 @@ export function DonateWidget({
   const [error, setError] = useState<string | null>(null);
   const [depositTx, setDepositTx] = useState("");
   const [disbursement, setDisbursement] = useState<Disbursement | null>(null);
+  const [stepNote, setStepNote] = useState("");
 
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const chainId = useChainId();
   const { connectAsync, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
+  const { signMessageAsync } = useSignMessage();
+  const { sendTransactionAsync } = useSendTransaction();
 
   const isCustom = selected === CUSTOM;
   const selectedCause = causes.find((c) => c.slug === selected);
@@ -80,6 +92,32 @@ export function DonateWidget({
         await switchChainAsync({ chainId: sepolia.id }).catch(() => {
           throw new Error("Please switch your wallet to the Sepolia testnet.");
         });
+      }
+
+      // Preferred path: real V2 depositFor - one transaction straight to the
+      // cause, no simulated step. Falls back to the path below on any error.
+      if (USE_V2 && address) {
+        try {
+          setStep("depositing");
+          const hash = await depositForViaV2({
+            ownerAddress: address,
+            recipient: recipient as `0x${string}`,
+            amountWeiHex: toHex(parseEther(amount)),
+            signMessage: (message) => signMessageAsync({ message }),
+            sendTransaction: ({ to, data, value }) =>
+              sendTransactionAsync({ to, data, value }),
+            onStep: setStepNote,
+          });
+          setDepositTx(hash);
+          setDisbursement({ txHash: hash, simulated: false });
+          recordGift(isCustom ? "custom" : selected, parseFloat(amount) || 0);
+          setStep("done");
+          return;
+        } catch (e) {
+          Sentry.captureException(e);
+          setStepNote("Real path unavailable, using the safe demo path…");
+          // fall through to the deposit + simulated-disbursement path below
+        }
       }
 
       // 1. Real on-chain deposit into the Privacy Pool.
@@ -245,6 +283,10 @@ export function DonateWidget({
                 2. Sending privately to {recipientName}…
               </li>
             </ol>
+          )}
+
+          {busy && stepNote && (
+            <p className="mt-2 text-xs text-muted">{stepNote}</p>
           )}
 
           {error && (

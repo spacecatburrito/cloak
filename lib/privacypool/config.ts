@@ -28,6 +28,13 @@ export const MAX_DEPOSIT_ETH = 1;
 export const SIMULATE =
   (process.env.NEXT_PUBLIC_SIMULATE_PROOFS ?? "true") !== "false";
 
+/**
+ * When true, the donate flow attempts the real Privacy Pools V2 "depositFor":
+ * one on-chain transaction that deposits straight to the cause (no simulated
+ * step). Falls back to the deposit + simulated-disbursement path on any error.
+ */
+export const USE_V2 = process.env.NEXT_PUBLIC_USE_V2 === "true";
+
 export const ASP_ENDPOINT = process.env.NEXT_PUBLIC_ASP_ENDPOINT || "";
 export const RELAYER_URL = process.env.NEXT_PUBLIC_RELAYER_URL || "";
 

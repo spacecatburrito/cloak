@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // The Privacy Pools SDK bundles snarkjs and other ESM that needs transpiling.
-  transpilePackages: ["@0xbow/privacy-pools-core-sdk"],
+  transpilePackages: [
+    "@0xbow/privacy-pools-core-sdk",
+    "@0xbow-io/privacy-pools-v2-sdk",
+  ],
   webpack: (config) => {
     // snarkjs / sdk reference node built-ins that don't exist in the browser.
     config.resolve = config.resolve || {};

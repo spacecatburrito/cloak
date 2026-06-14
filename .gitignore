@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# secrets - npm auth token for the private 0xbow GitHub Packages registry
+.npmrc
+
 # vercel
 .vercel
 
