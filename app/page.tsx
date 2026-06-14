@@ -51,9 +51,10 @@ export default function Home() {
               style={{ animationDelay: "180ms" }}
             >
               Around the world, supporting democracy, a free press, and human rights can
-              make you a target - and a public blockchain donation is permanent proof of
-              who you backed. Cloak breaks the link between you and the cause, so standing
-              up for what you believe in no longer puts you at risk.
+              make you a target - and every traceable donation, by card, bank, or public
+              blockchain, is permanent proof of who you backed. Cloak breaks the link
+              between you and the cause, so standing up for what you believe in no longer
+              puts you at risk.
             </p>
             <div className="reveal mt-7 flex flex-wrap gap-3" style={{ animationDelay: "280ms" }}>
               <Link href="/create" className="rounded-full border border-border bg-surface/70 px-5 py-2.5 text-sm font-medium backdrop-blur transition hover:bg-accent-soft">
@@ -159,8 +160,8 @@ export default function Home() {
               Cloak was built at the ctrl/shift 2026 hackathon around one idea: defending
               democracy, free expression, and human rights should not require courage you
               can be punished for. In dozens of countries, donating to independent media or
-              a rights group is treated as a crime, and a public blockchain donation is
-              permanent proof of who you supported.
+              a rights group is treated as a crime, and the money trail - card, bank, or a
+              public blockchain - is permanent proof of who you supported.
             </p>
             <p>
               Cloak uses accountable privacy so people can stand behind these freedoms
