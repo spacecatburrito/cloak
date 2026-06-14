@@ -6,7 +6,6 @@ import { sepolia } from "viem/chains";
 import {
   useAccount,
   useConnect,
-  useChainId,
   useSwitchChain,
   useWriteContract,
   useSignMessage,
@@ -52,8 +51,8 @@ export function DonateWidget({
   const [disbursement, setDisbursement] = useState<Disbursement | null>(null);
   const [stepNote, setStepNote] = useState("");
 
-  const { isConnected, address } = useAccount();
-  const chainId = useChainId();
+  // chainId here is the wallet's ACTUAL connected chain (not the config default).
+  const { isConnected, address, chainId } = useAccount();
   const { connectAsync, connectors } = useConnect();
   const { switchChainAsync } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
@@ -77,7 +76,7 @@ export function DonateWidget({
   const balanceEth = balanceData ? Number(formatEther(balanceData.value)) : null;
   // Leave a little ETH for gas when offering "Max".
   const maxAmount = balanceEth != null ? Math.max(0, balanceEth - 0.002) : null;
-  const wrongChain = isConnected && chainId !== sepolia.id;
+  const wrongChain = isConnected && chainId != null && chainId !== sepolia.id;
 
   // The cause object the Receipt needs (works for custom too).
   const receiptCause: Cause = selectedCause ?? {
@@ -216,10 +215,8 @@ export function DonateWidget({
               <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
               Network: Ethereum Sepolia (testnet)
             </span>
-            {isConnected && chainId !== sepolia.id && (
-              <span className="font-medium text-danger">
-                Wrong network - switch to Sepolia
-              </span>
+            {wrongChain && (
+              <span className="font-medium text-danger">Wrong network</span>
             )}
           </div>
 
