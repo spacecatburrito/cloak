@@ -10,7 +10,7 @@ export default function GalleryPage() {
     <>
       <SiteHeader />
       <Container className="py-14">
-        <h1 className="text-3xl font-semibold tracking-tight">Causes</h1>
+        <h1 className="font-display text-4xl font-light tracking-tight">Causes</h1>
         <p className="mt-3 max-w-2xl text-muted">
           Each of these is dangerous to support openly somewhere in the world. Give
           privately, or create a page for a cause of your own.

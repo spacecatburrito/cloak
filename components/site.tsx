@@ -16,14 +16,14 @@ export function Container({
 
 export function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+    <Link href="/" className="flex items-center gap-2 tracking-tight">
       <span
         aria-hidden
         className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-surface"
       >
         ◆
       </span>
-      Cloak
+      <span className="font-display text-xl">Cloak</span>
     </Link>
   );
 }

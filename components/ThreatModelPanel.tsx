@@ -14,7 +14,7 @@ const DOES_NOT = [
 export function ThreatModelPanel() {
   return (
     <section className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
-      <h3 className="text-lg font-semibold tracking-tight">
+      <h3 className="font-display text-2xl font-light tracking-tight">
         What Cloak does, and does not, protect
       </h3>
       <p className="mt-2 text-sm text-muted">

@@ -13,7 +13,7 @@ export function CauseCard({ cause }: { cause: Cause }) {
       >
         {cause.category}
       </span>
-      <h3 className="mt-4 text-xl font-semibold tracking-tight">{cause.name}</h3>
+      <h3 className="font-display mt-4 text-2xl font-light tracking-tight">{cause.name}</h3>
       <p className="mt-2 flex-1 text-sm leading-6 text-muted">{cause.blurb}</p>
       <span className="mt-4 text-sm font-medium text-accent group-hover:underline">
         Give privately →

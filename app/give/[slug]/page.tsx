@@ -67,7 +67,7 @@ export default async function GivePage({
             >
               {cause.category}
             </span>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight">{cause.name}</h1>
+            <h1 className="font-display mt-4 text-4xl font-light tracking-tight">{cause.name}</h1>
             <p className="mt-4 text-lg leading-8 text-foreground/90">{cause.story}</p>
             <a
               href={cause.officialDonationUrl}
