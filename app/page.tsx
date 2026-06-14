@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Container, SiteHeader, SiteFooter } from "@/components/site";
-import { CauseCard } from "@/components/CauseCard";
 import { ThreatModelPanel } from "@/components/ThreatModelPanel";
+import { DonateWidget } from "@/components/DonateWidget";
 import { getCauses } from "@/lib/causes";
 
 const STEPS = [
@@ -29,63 +29,57 @@ export default function Home() {
     <>
       <SiteHeader />
 
-      {/* Hero */}
+      {/* Hero with the donate widget instantly visible */}
       <section className="relative overflow-hidden">
         <div className="veil pointer-events-none absolute inset-0 -z-10" />
-        <Container className="py-24 sm:py-32">
-          <p className="reveal text-sm font-medium tracking-wide text-accent" style={{ animationDelay: "0ms" }}>
-            Private, accountable giving · built on Privacy Pools v2
-          </p>
-          <h1
-            className="reveal font-display mt-5 max-w-4xl text-5xl font-light leading-[1.05] tracking-tight sm:text-6xl"
-            style={{ animationDelay: "80ms" }}
-          >
-            Give to what you believe in, without{" "}
-            <em className="italic text-accent">becoming a target.</em>
-          </h1>
-          <p
-            className="reveal mt-7 max-w-2xl text-lg leading-8 text-muted"
-            style={{ animationDelay: "180ms" }}
-          >
-            In Norvelia, Ardenia, Velmora and beyond, donating to independent media or
-            human-rights groups is now evidence that can be used against you. Cloak
-            breaks the public on-chain link between you and the cause, so support stops
-            being a confession.
-          </p>
-          <div
-            className="reveal mt-9 flex flex-wrap gap-3"
-            style={{ animationDelay: "280ms" }}
-          >
-            <Link
-              href="/gallery"
-              className="rounded-full bg-accent px-6 py-3 font-medium text-surface transition hover:opacity-90"
+        <Container className="grid gap-12 py-16 sm:py-20 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
+          <div>
+            <p className="reveal text-sm font-medium tracking-wide text-accent" style={{ animationDelay: "0ms" }}>
+              Private, accountable giving · built on Privacy Pools v2
+            </p>
+            <h1
+              className="reveal font-display mt-5 max-w-2xl text-5xl font-light leading-[1.05] tracking-tight sm:text-6xl"
+              style={{ animationDelay: "80ms" }}
             >
-              Give privately
-            </Link>
-            <Link
-              href="/create"
-              className="rounded-full border border-border bg-surface/70 px-6 py-3 font-medium backdrop-blur transition hover:bg-accent-soft"
+              Give to what you believe in, without{" "}
+              <em className="italic text-accent">becoming a target.</em>
+            </h1>
+            <p
+              className="reveal mt-6 max-w-xl text-lg leading-8 text-muted"
+              style={{ animationDelay: "180ms" }}
             >
-              Create a donation page
-            </Link>
+              In Norvelia, Ardenia, Velmora and beyond, donating to independent media or
+              human-rights groups is now evidence that can be used against you. Cloak
+              breaks the public on-chain link between you and the cause, so support stops
+              being a confession.
+            </p>
+            <div className="reveal mt-7 flex flex-wrap gap-3" style={{ animationDelay: "280ms" }}>
+              <Link href="/create" className="rounded-full border border-border bg-surface/70 px-5 py-2.5 text-sm font-medium backdrop-blur transition hover:bg-accent-soft">
+                Create a donation page
+              </Link>
+              <Link href="#how" className="rounded-full px-5 py-2.5 text-sm font-medium text-accent hover:underline">
+                How it works
+              </Link>
+            </div>
+          </div>
+
+          <div className="reveal lg:pt-6" style={{ animationDelay: "360ms" }}>
+            <DonateWidget causes={causes} />
           </div>
         </Container>
       </section>
 
-      {/* Anchor story - editorial pull quote */}
+      {/* Anchor story */}
       <Container className="py-8">
         <figure className="relative rounded-3xl border border-border bg-surface px-7 py-10 sm:px-12 sm:py-14">
-          <span
-            aria-hidden
-            className="font-display absolute left-6 top-3 select-none text-7xl italic leading-none text-accent/20"
-          >
+          <span aria-hidden className="font-display absolute left-6 top-3 select-none text-7xl italic leading-none text-accent/20">
             &ldquo;
           </span>
           <blockquote className="font-display relative text-2xl font-light italic leading-relaxed sm:text-[28px]">
-            I am Norvelian and I live abroad. I still will not donate to Lantern Post, because
-            one day I might need to go back. And my friends who visit family in Norvelia?
-            They give nothing at all. We are not afraid of the cause. We are afraid of
-            being seen supporting it.
+            I am Norvelian and I live abroad. I still will not donate to Lantern Post, because one
+            day I might need to go back. And my friends who visit family in Norvelia? They
+            give nothing at all. We are not afraid of the cause. We are afraid of being
+            seen supporting it.
           </blockquote>
           <figcaption className="mt-6 text-sm text-muted">
             The reason millions of quiet supporters give nothing.
@@ -94,7 +88,7 @@ export default function Home() {
       </Container>
 
       {/* How it works */}
-      <Container className="py-16">
+      <Container id="how" className="scroll-mt-20 py-16">
         <h2 className="font-display text-3xl font-light tracking-tight">How it works</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {STEPS.map((s) => (
@@ -107,19 +101,38 @@ export default function Home() {
         </div>
       </Container>
 
-      {/* Causes */}
+      {/* Cases - expandable */}
       <Container className="py-8">
-        <div className="flex items-end justify-between">
-          <h2 className="font-display max-w-md text-3xl font-light leading-snug tracking-tight">
-            Causes that are dangerous to support openly
-          </h2>
-          <Link href="/gallery" className="text-sm font-medium text-accent hover:underline">
-            View all
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {causes.map((cause) => (
-            <CauseCard key={cause.slug} cause={cause} />
+        <h2 className="font-display max-w-md text-3xl font-light leading-snug tracking-tight">
+          The causes, and why they matter
+        </h2>
+        <div className="mt-8 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
+          {causes.map((c) => (
+            <details key={c.slug} className="group px-6 py-5">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 list-none">
+                <span className="flex flex-col">
+                  <span className="font-display text-xl font-light">{c.name}</span>
+                  <span className="text-sm text-muted">{c.blurb}</span>
+                </span>
+                <span
+                  className="shrink-0 rounded-full px-3 py-1 text-xs font-medium"
+                  style={{ backgroundColor: `${c.accent}1a`, color: c.accent }}
+                >
+                  {c.category}
+                </span>
+              </summary>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground/85">{c.story}</p>
+              <div className="mt-4 flex flex-wrap gap-4 text-sm">
+                <Link href={`/give/${c.slug}`} className="font-medium text-accent hover:underline">
+                  Give to {c.name} →
+                </Link>
+                {c.officialDonationUrl && (
+                  <a href={c.officialDonationUrl} target="_blank" rel="noreferrer" className="text-muted hover:text-foreground">
+                    Official page ↗
+                  </a>
+                )}
+              </div>
+            </details>
           ))}
         </div>
       </Container>
@@ -129,7 +142,79 @@ export default function Home() {
         <ThreatModelPanel />
       </Container>
 
+      {/* About */}
+      <Container id="about" className="scroll-mt-20 py-12">
+        <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <h2 className="font-display text-3xl font-light tracking-tight">About Cloak</h2>
+          <div className="space-y-4 text-base leading-7 text-foreground/85">
+            <p>
+              Cloak was built at the ctrl/shift 2026 hackathon around one idea: in much of
+              the world, supporting a cause publicly is the danger, not the cause itself.
+              People self-censor their generosity because a blockchain donation is a
+              permanent, public record of who they support.
+            </p>
+            <p>
+              Cloak uses accountable privacy so people can give without that risk, and so
+              causes can still prove the money they receive is clean. It is one honest
+              layer of protection - not a promise of anonymity.
+            </p>
+          </div>
+        </div>
+      </Container>
+
+      {/* FAQ */}
+      <Container id="faq" className="scroll-mt-20 py-12">
+        <h2 className="font-display text-3xl font-light tracking-tight">FAQ</h2>
+        <div className="mt-8 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface">
+          {FAQ.map((item) => (
+            <details key={item.q} className="px-6 py-5">
+              <summary className="cursor-pointer list-none text-base font-medium">
+                {item.q}
+              </summary>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/85">{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </Container>
+
+      {/* Powered by */}
+      <Container className="py-12">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface px-6 py-10 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">Powered by</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/vendor/0xbow.svg" alt="0xbow Privacy Pools" className="h-8 w-auto" />
+          <p className="max-w-md text-sm text-muted">
+            Cloak deploys no new smart contracts. It calls 0xbow&rsquo;s deployed,
+            open-source Privacy Pools v2 contracts directly, so it adds no new on-chain
+            attack surface. Errors are monitored with Sentry.
+          </p>
+        </div>
+      </Container>
+
       <SiteFooter />
     </>
   );
 }
+
+const FAQ = [
+  {
+    q: "Is this anonymous?",
+    a: "No. Cloak breaks the public on-chain link between your wallet and the cause, but it is not anonymity. It does not hide how you originally bought the crypto, your network metadata, or unusual timing patterns. Treat it as one layer of protection.",
+  },
+  {
+    q: "Do I have to trust Cloak with my money?",
+    a: "No custody. You sign every transaction from your own wallet. Cloak deploys no new smart contracts - it only calls 0xbow's deployed, open-source Privacy Pools v2 contracts.",
+  },
+  {
+    q: "Where does my money actually go?",
+    a: "This is a Sepolia testnet demo, so no real funds move. Each cause links to its real official donation page. The deposit is a genuine on-chain transaction; the private disbursement is simulated in this demo and labelled as such.",
+  },
+  {
+    q: "What chain and token does it use?",
+    a: "Ethereum Sepolia testnet, in ETH. On mainnet it would use the same Privacy Pools v2 contracts.",
+  },
+  {
+    q: "Can I raise funds for my own cause?",
+    a: "Yes. Create a donation page in seconds, then share the link or embed the widget on your own site - no account needed.",
+  },
+];

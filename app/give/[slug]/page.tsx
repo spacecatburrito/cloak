@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container, SiteHeader, SiteFooter } from "@/components/site";
 import { ThreatModelPanel } from "@/components/ThreatModelPanel";
-import { DonateButton } from "@/components/DonateButton";
+import { DonateWidget } from "@/components/DonateWidget";
 import { EmbedSnippet } from "@/components/EmbedSnippet";
 import { RiskExplainer } from "@/components/RiskExplainer";
 import { getCause, type Cause } from "@/lib/causes";
@@ -43,7 +43,7 @@ export default async function GivePage({
         <h1 className="mt-3 text-xl font-semibold tracking-tight">{cause.name}</h1>
         <p className="mt-2 text-sm leading-6 text-muted">{cause.blurb}</p>
         <div className="mt-4">
-          <DonateButton cause={cause} />
+          <DonateWidget causes={[cause]} lockedSlug={cause.slug} compact />
         </div>
         <p className="mt-3 text-xs text-muted">
           Private giving via Cloak · testnet demo
@@ -83,16 +83,9 @@ export default async function GivePage({
             </div>
           </div>
 
-          <aside className="lg:sticky lg:top-8 h-fit rounded-2xl border border-border bg-surface p-6">
-            <h2 className="text-lg font-semibold tracking-tight">Give privately</h2>
-            <p className="mt-2 text-sm text-muted">
-              Your wallet deposits into a Privacy Pool, then the gift reaches{" "}
-              {cause.name} with no public link back to you.
-            </p>
-            <div className="mt-5">
-              <DonateButton cause={cause} />
-            </div>
-            <div className="mt-6 border-t border-border pt-5">
+          <aside className="lg:sticky lg:top-8 h-fit space-y-6">
+            <DonateWidget causes={[cause]} lockedSlug={cause.slug} />
+            <div className="rounded-2xl border border-border bg-surface p-6">
               <EmbedSnippet slug={cause.slug} />
             </div>
           </aside>
