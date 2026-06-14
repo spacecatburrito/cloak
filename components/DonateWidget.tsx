@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createPublicClient, http, parseEther, isAddress, toHex } from "viem";
+import { createPublicClient, http, parseEther, isAddress, toHex, formatEther } from "viem";
 import { sepolia } from "viem/chains";
 import {
   useAccount,
@@ -11,6 +11,7 @@ import {
   useWriteContract,
   useSignMessage,
   useSendTransaction,
+  useBalance,
 } from "wagmi";
 import * as Sentry from "@sentry/nextjs";
 import type { Cause } from "@/lib/causes";
@@ -42,7 +43,9 @@ export function DonateWidget({
 }) {
   const [selected, setSelected] = useState(lockedSlug ?? causes[0]?.slug ?? CUSTOM);
   const [customAddr, setCustomAddr] = useState("");
-  const [amount, setAmount] = useState("0.005");
+  const [preset, setPreset] = useState("0.005");
+  const [customAmount, setCustomAmount] = useState("");
+  const [switching, setSwitching] = useState(false);
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
   const [depositTx, setDepositTx] = useState("");
@@ -56,6 +59,11 @@ export function DonateWidget({
   const { writeContractAsync } = useWriteContract();
   const { signMessageAsync } = useSignMessage();
   const { sendTransactionAsync } = useSendTransaction();
+  const { data: balanceData } = useBalance({
+    address,
+    chainId: sepolia.id,
+    query: { enabled: !!address },
+  });
 
   const isCustom = selected === CUSTOM;
   const selectedCause = causes.find((c) => c.slug === selected);
@@ -63,6 +71,13 @@ export function DonateWidget({
   const recipientName = isCustom ? "this address" : selectedCause?.name ?? "the cause";
   const recipientValid = isAddress(recipient);
   const busy = step === "depositing" || step === "disbursing";
+
+  // Amount: a preset, unless the user typed a custom value.
+  const amount = customAmount.trim() !== "" ? customAmount.trim() : preset;
+  const balanceEth = balanceData ? Number(formatEther(balanceData.value)) : null;
+  // Leave a little ETH for gas when offering "Max".
+  const maxAmount = balanceEth != null ? Math.max(0, balanceEth - 0.002) : null;
+  const wrongChain = isConnected && chainId !== sepolia.id;
 
   // The cause object the Receipt needs (works for custom too).
   const receiptCause: Cause = selectedCause ?? {
@@ -75,6 +90,18 @@ export function DonateWidget({
     testnetRecipient: recipient || "0x0000000000000000000000000000000000000000",
     accent: "#2e6657",
   };
+
+  async function handleSwitch() {
+    setError(null);
+    setSwitching(true);
+    try {
+      await switchChainAsync({ chainId: sepolia.id });
+    } catch {
+      setError("Could not switch automatically. Open your wallet and switch to Sepolia.");
+    } finally {
+      setSwitching(false);
+    }
+  }
 
   async function handleGive() {
     setError(null);
@@ -264,24 +291,51 @@ export function DonateWidget({
           )}
 
           {/* Amount */}
-          <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted">Amount (ETH)</p>
+          <div className="mt-5 flex items-center justify-between gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted">Amount (ETH)</p>
+            {balanceEth != null && (
+              <p className="text-xs text-muted">
+                Balance:{" "}
+                <span className="font-medium text-foreground">{balanceEth.toFixed(4)}</span> ETH
+              </p>
+            )}
+          </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {PRESETS.map((p) => (
+            {PRESETS.map((p) => {
+              const active = customAmount.trim() === "" && preset === p;
+              return (
+                <button
+                  key={p}
+                  disabled={busy}
+                  onClick={() => {
+                    setPreset(p);
+                    setCustomAmount("");
+                  }}
+                  className={`rounded-full border px-4 py-1.5 text-sm transition ${
+                    active
+                      ? "border-accent bg-accent-soft text-accent"
+                      : "border-border hover:bg-accent-soft/50"
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
+            {maxAmount != null && maxAmount > 0 && (
               <button
-                key={p}
                 disabled={busy}
-                onClick={() => setAmount(p)}
-                className={`rounded-full border px-4 py-1.5 text-sm transition ${
-                  amount === p ? "border-accent bg-accent-soft text-accent" : "border-border hover:bg-accent-soft/50"
-                }`}
+                onClick={() => setCustomAmount(maxAmount.toFixed(6))}
+                className="rounded-full border border-border px-4 py-1.5 text-sm font-medium transition hover:bg-accent-soft/50"
               >
-                {p}
+                Max
               </button>
-            ))}
+            )}
             <input
-              value={amount}
+              value={customAmount}
               disabled={busy}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => setCustomAmount(e.target.value)}
+              placeholder="Custom"
+              inputMode="decimal"
               className="w-24 rounded-full border border-border px-3 py-1.5 text-sm outline-none focus:border-accent"
             />
           </div>
@@ -306,19 +360,29 @@ export function DonateWidget({
             <p className="mt-4 rounded-lg bg-danger/10 p-3 text-sm text-danger">{error}</p>
           )}
 
-          <button
-            onClick={handleGive}
-            disabled={busy || (isCustom && !recipientValid)}
-            className="mt-5 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
-          >
-            {busy
-              ? step === "depositing"
-                ? "Confirm in your wallet…"
-                : "Sending privately…"
-              : isConnected
-                ? `Give ${amount} ETH to ${recipientName}`
-                : "Connect wallet & give"}
-          </button>
+          {wrongChain ? (
+            <button
+              onClick={handleSwitch}
+              disabled={switching}
+              className="mt-5 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              {switching ? "Switching…" : "Switch wallet to Sepolia"}
+            </button>
+          ) : (
+            <button
+              onClick={handleGive}
+              disabled={busy || (isCustom && !recipientValid)}
+              className="mt-5 w-full rounded-full bg-accent px-5 py-3 font-medium text-white transition hover:opacity-90 disabled:opacity-60"
+            >
+              {busy
+                ? step === "depositing"
+                  ? "Confirm in your wallet…"
+                  : "Sending privately…"
+                : isConnected
+                  ? `Give ${amount} ETH to ${recipientName}`
+                  : "Connect wallet & give"}
+            </button>
+          )}
         </>
       )}
     </div>
