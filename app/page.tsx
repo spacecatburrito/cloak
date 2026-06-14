@@ -15,7 +15,7 @@ const STEPS = [
   {
     n: "02",
     t: "The link is broken",
-    d: "The gift moves from the pool to the cause, with no on-chain trail back to you.",
+    d: "The donation moves from the pool to the cause, with no on-chain trail back to you.",
   },
   {
     n: "03",
