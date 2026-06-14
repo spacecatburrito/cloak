@@ -3,6 +3,7 @@ import { Container, SiteHeader, SiteFooter } from "@/components/site";
 import { ThreatModelPanel } from "@/components/ThreatModelPanel";
 import { DonateWidget } from "@/components/DonateWidget";
 import { GlobalRepression } from "@/components/GlobalRepression";
+import { ImpactStats } from "@/components/ImpactStats";
 import { getCauses } from "@/lib/causes";
 
 const STEPS = [
@@ -87,6 +88,9 @@ export default function Home() {
           </figcaption>
         </figure>
       </Container>
+
+      {/* Scale of the problem */}
+      <ImpactStats />
 
       {/* It happens everywhere */}
       <GlobalRepression />
