@@ -10,6 +10,19 @@ breaks the public link between donor and cause, built as a UI on top of
 
 > Built at the ctrl/shift 2026 Hackathon (Naples). Testnet demo - no real funds move.
 
+## Live demo
+
+**https://cloak.203.0.113.10.example.org** (password-gated)
+Username: `cloak` · Password: `REDACTED`
+
+Real Privacy Pools v2 deposit on Sepolia. Example on-chain proof:
+[deposit tx](https://sepolia.etherscan.io/tx/0x3e664e527d119a073464c668e42f78edf5708a59a160dfb3609dbac30d067ea7)
+into the V2 entrypoint `0xEB3e3961008952348445513e418ad6F43C23ca9a`.
+
+> Note for cloning: the `@0xbow-io/privacy-pools-v2-sdk` is a private hackathon-beta
+> package on GitHub Packages and needs a (maintainer-issued) token in `.npmrc` to
+> install. The live link above is the easiest way to see it working.
+
 ## The problem
 
 "I am Norvelian and I live abroad. I still will not donate to Lantern Post, because one day I
