@@ -1,60 +1,36 @@
 import { Container } from "@/components/site";
 
-const FLAGS = ["🇷🇺", "🇧🇾", "🇭🇰", "🇲🇲", "🇹🇷", "🇮🇷", "🇮🇳", "🇻🇪", "🇳🇮", "🇪🇬"];
+const FLAGS = ["🌍", "🌏", "🌎", "🗺️", "🧭"];
 
 const COUNTRIES: { flag: string; name: string; line: string; href: string }[] = [
   {
-    flag: "🇷🇺",
+    flag: "🌍",
     name: "Norvelia",
-    line: "200+ donors prosecuted; 12 years for a ~$50 gift to a relief charity.",
+    line: "Donors to an 'undesirable' outlet face criminal cases. Fictional example.",
     href: "https://example.org/",
   },
   {
-    flag: "🇧🇾",
-    name: "Velmora",
-    line: '112+ convicted of "financing extremism"; jailed over a $15 donation.',
-    href: "https://example.org/",
-  },
-  {
-    flag: "🇭🇰",
-    name: "Port Ardis",
-    line: "Trustees of a protester-relief fund, incl. a trustee, convicted under the security law.",
-    href: "https://example.org/",
-  },
-  {
-    flag: "🇲🇲",
-    name: "Varenia",
-    line: "Life sentences for funding the civil disobedience movement.",
-    href: "https://example.org/",
-  },
-  {
-    flag: "🇹🇷",
-    name: "Kessan",
-    line: '10 years for depositing money in the "wrong" bank; the ECtHR later faulted Kessan.',
-    href: "https://example.org/",
-  },
-  {
-    flag: "🇮🇷",
+    flag: "🌏",
     name: "Ardenia",
-    line: "Funding a banned group is collusion against the state: confiscation, or death.",
+    line: "Giving to a banned aid group is treated as financing an offence. Fictional example.",
     href: "https://example.org/",
   },
   {
-    flag: "🇮🇳",
-    name: "Dravia",
-    line: "20,000+ NGOs stripped of the right to receive foreign donations.",
+    flag: "🌎",
+    name: "Tessaly",
+    line: "Trustees of a relief fund are fined for not registering it. Fictional example.",
     href: "https://example.org/",
   },
   {
-    flag: "🇻🇪",
-    name: "Esmara & Lunera",
-    line: '"Foreign agent" laws have shut 1,500+ organisations.',
+    flag: "🗺️",
+    name: "Velmora",
+    line: "Long sentences for people accused of funding a local defence group. Fictional example.",
     href: "https://example.org/",
   },
   {
-    flag: "🇪🇬",
-    name: "Calder",
-    line: 'Dozens of NGO workers prosecuted in the "foreign funding" case.',
+    flag: "🧭",
+    name: "Korrin",
+    line: "Foreign donations to civil society must be approved by the state. Fictional example.",
     href: "https://example.org/",
   },
 ];
@@ -76,9 +52,9 @@ export function GlobalRepression() {
           This is not one country&rsquo;s problem.
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-center text-lg leading-8 text-muted">
-          On every continent, defending democracy, a free press, and basic human rights is
-          being treated as a crime. When the money trail is public, generosity becomes
-          evidence. These are places where giving already carries a price:
+          Fictional countries used in this demo. In the real world the pattern repeats: defending
+          democracy, a free press, and basic human rights can be treated as a crime. When the money trail is public, generosity becomes
+          evidence. These are fictional places where giving already carries a price:
         </p>
 
         <div className="mt-10 grid gap-x-8 gap-y-5 sm:grid-cols-2">

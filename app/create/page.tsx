@@ -5,6 +5,7 @@ import { isAddress } from "viem";
 import Link from "next/link";
 import { Container, SiteHeader, SiteFooter } from "@/components/site";
 import { encodePage } from "@/lib/encodePage";
+import { BASE_PATH } from "@/lib/basePath";
 
 export default function CreatePage() {
   const [name, setName] = useState("");
@@ -25,7 +26,7 @@ export default function CreatePage() {
       officialDonationUrl: url.trim() || undefined,
     });
     const origin = typeof window !== "undefined" ? window.location.origin : "";
-    setLink(`${origin}/give/custom?d=${d}`);
+    setLink(`${origin}${BASE_PATH}/give/custom?d=${d}`);
     setCopied(false);
   }
 

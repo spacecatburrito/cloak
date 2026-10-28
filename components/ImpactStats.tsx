@@ -1,27 +1,17 @@
 import { Container } from "@/components/site";
 
 const STATS = [
-  { n: "72%", l: "of the global population live under repressed or closed civic space - donating money can be dangerous for them" },
-  { n: "81", l: "countries rated repressed or closed; only 40 of 198 are fully open" },
-  { n: "280+", l: "people already convicted for donating, in Norvelia and Velmora alone" },
-  { n: "$225M+", l: "in crypto donations to Tessaly alone - nearly all traceable to the giver" },
-];
-
-const SOURCES: { label: string; href: string }[] = [
-  { label: "a monitoring index Monitor 2024", href: "https://example.org/" },
-  { label: "an independent outlet", href: "https://example.org/" },
-  { label: "a monitoring group", href: "https://example.org/" },
-  {
-    label: "Crystal Intelligence",
-    href: "https://example.org/",
-  },
+  { n: "3", l: "fictional organisations in this demo" },
+  { n: "5", l: "fictional countries where giving carries legal risk" },
+  { n: "0", l: "real donations: this is a testnet demo" },
+  { n: "1", l: "real deposit on the Sepolia testnet" },
 ];
 
 export function ImpactStats() {
   return (
     <Container className="py-12">
       <p className="font-display mx-auto max-w-3xl text-center text-2xl font-light leading-snug tracking-tight sm:text-3xl">
-        Across dozens of countries, supporting the wrong cause can mean prison - and the
+        Across the fictional countries in this demo, supporting the wrong cause can mean prison - and the
         money trail gives you away. Cards, banks, and public blockchains all leave
         permanent proof of who you backed.
       </p>
@@ -36,20 +26,7 @@ export function ImpactStats() {
       </div>
 
       <p className="mt-10 text-center text-xs text-muted">
-        Sources:{" "}
-        {SOURCES.map((s, i) => (
-          <span key={s.href}>
-            <a
-              className="underline hover:text-foreground"
-              href={s.href}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {s.label}
-            </a>
-            {i < SOURCES.length - 1 ? ", " : "."}
-          </span>
-        ))}
+        Illustrative figures for this demo. No external sources.
       </p>
     </Container>
   );

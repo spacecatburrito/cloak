@@ -14,7 +14,7 @@ const AUDIENCES: { icon: string; title: string; body: string }[] = [
   {
     icon: "🏳️‍🌈",
     title: "LGBTQ+ communities",
-    body: "Back queer people where they are criminalised - Korrin, Ardenia, or under Norvelia's \"extremist\" LGBT ban - without exposing yourself.",
+    body: "Back queer people where they are criminalised, or where an \"extremist\" ban targets them, without exposing yourself.",
   },
   {
     icon: "✊",

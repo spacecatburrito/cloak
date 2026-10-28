@@ -11,7 +11,7 @@ describe("impact", () => {
   });
 
   it("getImpactFor returns a seeded cause and a zero row for unknown", () => {
-    expect(getImpactFor("Lantern Post").count).toBeGreaterThan(0);
+    expect(getImpactFor("lantern-post").count).toBeGreaterThan(0);
     expect(getImpactFor("unknown-cause")).toEqual({
       slug: "unknown-cause",
       totalEth: 0,

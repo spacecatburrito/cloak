@@ -6,6 +6,7 @@ import { GlobalRepression } from "@/components/GlobalRepression";
 import { ImpactStats } from "@/components/ImpactStats";
 import { WhoFor } from "@/components/WhoFor";
 import { getCauses } from "@/lib/causes";
+import { BASE_PATH } from "@/lib/basePath";
 
 const STEPS = [
   {
@@ -184,7 +185,7 @@ export default function Home() {
             </p>
             <p>
               The problem is not that people stopped caring - giving simply became a legal
-              risk. In Norvelia, even a small transfer to the wrong cause can trigger a
+              risk. In some countries, even a small transfer to the wrong cause can trigger a
               criminal case, so supporters were pushed toward cash, the diaspora, and
               crypto. Cloak makes that channel safe and accountable: people keep giving, the
               cause can still prove the funds are clean, and no public trail ties the two
@@ -214,10 +215,10 @@ export default function Home() {
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-surface px-6 py-10 text-center">
           <p className="text-xs font-medium uppercase tracking-wide text-muted">Powered by</p>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/vendor/0xbow.svg" alt="0xbow Privacy Pools" className="h-8 w-auto" />
+          <img src={`${BASE_PATH}/vendor/0xbow.svg`} alt="0xbow Privacy Pools" className="h-8 w-auto" />
           <div className="flex items-center gap-2 rounded-full border border-border px-4 py-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/vendor/dedaub.svg" alt="Dedaub" className="h-5 w-5" />
+            <img src={`${BASE_PATH}/vendor/dedaub.svg`} alt="Dedaub" className="h-5 w-5" />
             <span className="text-sm font-semibold tracking-tight">Audited by Dedaub</span>
             <span className="rounded-full bg-warm-soft px-2 py-0.5 text-xs font-medium text-warm">
               Coming soon

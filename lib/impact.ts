@@ -8,9 +8,9 @@ export type ImpactRow = { slug: string; totalEth: number; count: number };
 const STORAGE_KEY = "cloak.impact";
 
 const SEED: Record<string, ImpactRow> = {
-  Lantern Post: { slug: "Lantern Post", totalEth: 0.42, count: 7 },
-  "Open Docket": { slug: "Open Docket", totalEth: 0.31, count: 5 },
-  Harbor Relief: { slug: "Harbor Relief", totalEth: 0.58, count: 9 },
+  "lantern-post": { slug: "lantern-post", totalEth: 0.42, count: 7 },
+  "open-docket": { slug: "open-docket", totalEth: 0.31, count: 5 },
+  "harbor-relief": { slug: "harbor-relief", totalEth: 0.58, count: 9 },
 };
 
 function read(): Record<string, ImpactRow> {

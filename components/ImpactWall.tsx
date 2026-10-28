@@ -18,7 +18,7 @@ export function ImpactWall() {
         <div>
           <h3 className="text-lg font-semibold tracking-tight">Impact Wall</h3>
           <p className="mt-1 text-sm text-muted">
-            Verified-clean private giving. Amounts are public; donors are not.
+            Verified-clean private giving. Amounts are public; donors are not. Demo totals, not real donations.
           </p>
         </div>
         <p className="text-sm text-muted">

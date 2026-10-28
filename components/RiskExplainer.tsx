@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Cause } from "@/lib/causes";
+import { BASE_PATH } from "@/lib/basePath";
 
 export function RiskExplainer({ cause, d }: { cause: Cause; d?: string }) {
   const [situation, setSituation] = useState("");
@@ -12,7 +13,7 @@ export function RiskExplainer({ cause, d }: { cause: Cause; d?: string }) {
     setLoading(true);
     setAnswer(null);
     try {
-      const res = await fetch("/api/explain", {
+      const res = await fetch(`${BASE_PATH}/api/explain`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ situation, causeSlug: cause.slug, d }),

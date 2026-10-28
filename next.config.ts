@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Optional: serve under a sub-path and/or emit a self-contained server bundle.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   // The Privacy Pools SDK bundles snarkjs and other ESM that needs transpiling.
   transpilePackages: [
     "@0xbow/privacy-pools-core-sdk",

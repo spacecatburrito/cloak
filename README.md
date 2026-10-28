@@ -3,21 +3,25 @@
 **Give to what you believe in, without becoming a target.**
 
 Cloak is private, accountable giving to causes that are dangerous to support in public.
-In Norvelia, Ardenia, Velmora and beyond, a public on-chain donation to independent media or
+In many countries, a public on-chain donation to independent media or
 a human-rights group is permanent evidence that can be used against the donor. Cloak
 breaks the public link between donor and cause, built as a UI on top of
 [0xbow Privacy Pools v2](https://docs.privacypools.com).
 
-> Built at the ctrl/shift 2026 Hackathon (Naples). Testnet demo - no real funds move.
+> Built solo at the ctrl/shift 2026 hackathon (NapulETH, Naples, June 2026); 1st prize from sponsor 0xbow / Privacy Pools. Testnet demo - no real funds move.
 
 ## Live demo
 
-**https://cloak.203.0.113.10.example.org** (password-gated)
-Username: `cloak` · Password: `REDACTED`
+**https://tss.wtf/lena/demo-cloak** - the real app on Sepolia testnet, with fictional causes.
 
 Real Privacy Pools v2 deposit on Sepolia. Example on-chain proof:
 [deposit tx](https://sepolia.etherscan.io/tx/0x3e664e527d119a073464c668e42f78edf5708a59a160dfb3609dbac30d067ea7)
 into the V2 entrypoint `0xEB3e3961008952348445513e418ad6F43C23ca9a`.
+
+> **Demo data.** Everything about the causes is made up: the country "Norvelia" and the three
+> organisations (Lantern Post, Open Docket, Harbor Relief Fund) do not exist, and the Impact Wall
+> totals are seeded demo numbers, not real donations. The statistics in the "scale of the
+> problem" sections are real and link to their public sources.
 
 > Note for cloning: the `@0xbow-io/privacy-pools-v2-sdk` is a private hackathon-beta
 > package on GitHub Packages and needs a (maintainer-issued) token in `.npmrc` to
@@ -29,7 +33,8 @@ into the V2 entrypoint `0xEB3e3961008952348445513e418ad6F43C23ca9a`.
 might need to go back. And my friends who visit family in Norvelia give nothing at all.
 We are not afraid of the cause. We are afraid of being seen supporting it."
 
-Millions of quiet supporters give nothing because supporting a cause publicly is the risk.
+(Norvelia is a fictional country used in this demo.) Millions of quiet supporters give nothing
+because supporting a cause publicly is the risk.
 
 ## What it does
 
@@ -44,14 +49,13 @@ Millions of quiet supporters give nothing because supporting a cause publicly is
 - **Impact Wall**: aggregate verified-clean giving per cause, with no donor identities.
 - **Honest threat model**: a visible panel stating exactly what Cloak does NOT protect.
 
-## Seeded causes
+## Seeded causes (all fictional)
 
-- **Lantern Post** - independent Norvelian anti-war media.
-- **Open Docket** - supports political prisoners; added to Norvelia's "extremist" registry on 4 June 2026.
-- **Harbor Relief Fund** - humanitarian/medical relief (non-military).
+- **Lantern Post** - independent media in the made-up country of Norvelia.
+- **Open Docket** - tracks political arrests and gives legal aid to detainees.
+- **Harbor Relief Fund** - humanitarian relief for civilians (non-military).
 
-Donation pages link to each organization's official donation page. The live demo sends
-testnet ETH to a demo recipient; no real money moves.
+The recipient for all three is a burn address on Sepolia; no real money moves.
 
 ## Run locally
 

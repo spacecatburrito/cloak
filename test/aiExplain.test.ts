@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { EXPLAIN_SYSTEM, buildExplainMessages, cannedExplainer } from "@/lib/aiExplain";
 import { getCause } from "@/lib/causes";
 
-const cause = getCause("Lantern Post")!;
+const cause = getCause("lantern-post")!;
 
 describe("aiExplain", () => {
   it("system prompt forbids anonymity claims and demands the does/does-not split", () => {
